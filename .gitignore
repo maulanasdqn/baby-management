@@ -1,0 +1,25 @@
+# Rust
+core/target/
+core/**/*.so
+core/**/*.d
+
+# Android generated (populated by build.sh)
+android/libs/vault/kotlin/
+android/libs/vault/jniLibs/arm64-v8a/*.so
+android/libs/vault/jniLibs/armeabi-v7a/*.so
+android/libs/vault/jniLibs/x86/*.so
+android/libs/vault/jniLibs/x86_64/*.so
+
+# Android build
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# NDK zip (if cached locally)
+*.zip
+
+# IDE
+.idea/
+*.iml
+.DS_Store
