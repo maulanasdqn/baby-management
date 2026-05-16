@@ -4,4 +4,10 @@ object Routes {
     const val SPLASH = "splash"
     const val UNLOCK = "unlock"
     const val HOME = "home"
+
+    object Tab {
+        const val TIMELINE = "timeline"
+        const val GROWTH = "growth"
+        const val MEDIA = "media"
+    }
 }
