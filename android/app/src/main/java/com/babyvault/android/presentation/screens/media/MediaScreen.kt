@@ -78,7 +78,7 @@ fun MediaScreen(viewModel: MediaViewModel = hiltViewModel()) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         Button(
-            onClick = { photoPicker.launch(ActivityResultContracts.PickVisualMedia.ImageAndVideo) },
+            onClick = { photoPicker.launch(androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             enabled = !state.isUploading,
         ) {

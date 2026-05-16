@@ -1,6 +1,6 @@
 package com.babyvault.android.data.engine
 
-import com.babyvault.android.core.native.VaultEngineProvider
+import com.babyvault.android.core.vault.VaultEngineProvider
 import com.babyvault.android.data.local.SyncConfigStore
 import com.babyvault.android.data.mapper.toDomain
 import com.babyvault.android.domain.model.SyncStatus

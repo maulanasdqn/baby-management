@@ -132,4 +132,26 @@ mod tests {
         let synced = repo.synced.lock().unwrap();
         assert_eq!(synced[0].0, "milestone");
     }
+
+    #[test]
+    fn empty_pending_skips_push_and_returns_status() {
+        let repo = FakeSyncRepo::new(vec![]);
+        let client = FakeSyncClient::new();
+        let uc = SyncAllUseCase::new(&repo, &client);
+        let status = uc.execute("http://localhost:8080", "secret").unwrap();
+        assert_eq!(status.pending_milestones, 0);
+        // push should not have been called
+        assert!(client.pushed.lock().unwrap().is_empty());
+        // mark_synced should not have been called
+        assert!(repo.synced.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn get_status_returns_repo_status() {
+        let repo = FakeSyncRepo::new(vec![]);
+        let client = FakeSyncClient::new();
+        let uc = SyncAllUseCase::new(&repo, &client);
+        let status = uc.get_status().unwrap();
+        assert_eq!(status.last_synced_at_millis, Some(1_000_000));
+    }
 }

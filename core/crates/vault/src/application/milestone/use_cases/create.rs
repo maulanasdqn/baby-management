@@ -116,4 +116,29 @@ mod tests {
         });
         assert!(matches!(result, Err(MilestoneError::InvalidTitle)));
     }
+
+    #[test]
+    fn create_milestone_future_occurred_at_is_rejected() {
+        let repo = FakeRepo(Mutex::new(vec![]));
+        let uc = CreateMilestoneUseCase::new(repo);
+        let result = uc.execute(CreateMilestoneCommand {
+            title: "Future Event".into(),
+            description: "".into(),
+            occurred_at: Utc::now() + chrono::Duration::days(1),
+        });
+        assert!(matches!(result, Err(MilestoneError::InvalidOccurredAt)));
+    }
+
+    #[test]
+    fn created_milestone_is_stored_in_repo() {
+        let repo = FakeRepo(Mutex::new(vec![]));
+        let uc = CreateMilestoneUseCase::new(&repo);
+        uc.execute(CreateMilestoneCommand {
+            title: "Smile".into(),
+            description: "First smile".into(),
+            occurred_at: Utc::now() - chrono::Duration::days(7),
+        })
+        .unwrap();
+        assert_eq!(repo.0.lock().unwrap().len(), 1);
+    }
 }

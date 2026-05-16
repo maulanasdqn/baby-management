@@ -1,7 +1,7 @@
 package com.babyvault.android.di
 
 import android.content.Context
-import com.babyvault.android.core.native.VaultEngineProvider
+import com.babyvault.android.core.vault.VaultEngineProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

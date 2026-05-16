@@ -152,7 +152,7 @@ fun SyncSettingsScreen(
 
             // Manual sync
             OutlinedButton(
-                onClick = { viewModel.syncNow() },
+                onClick = { viewModel.triggerSync() },
                 enabled = state.status?.isConfigured == true && !state.isSyncing,
                 modifier = Modifier.fillMaxWidth(),
             ) {

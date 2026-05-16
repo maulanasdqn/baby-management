@@ -62,7 +62,7 @@ class SyncSettingsViewModel @Inject constructor(
         }
     }
 
-    fun syncNow() {
+    fun triggerSync() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isSyncing = true, error = null)
             syncNow()

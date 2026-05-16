@@ -1,6 +1,6 @@
 package com.babyvault.android.data.engine
 
-import com.babyvault.android.core.native.VaultEngineProvider
+import com.babyvault.android.core.vault.VaultEngineProvider
 import com.babyvault.android.domain.repo.VaultRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,10 +11,10 @@ class EngineVaultRepository @Inject constructor(
 ) : VaultRepository {
 
     override suspend fun generateMasterKey(): Result<ByteArray> = withContext(Dispatchers.IO) {
-        runCatching { provider.engine.generateMasterKey().toByteArray() }
+        runCatching { provider.engine.generateMasterKey() }
     }
 
     override suspend fun unlock(rawKey: ByteArray): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching { provider.engine.unlock(rawKey.toList()) }
+        runCatching { provider.engine.unlock(rawKey) }
     }
 }

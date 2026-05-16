@@ -1,4 +1,4 @@
-package com.babyvault.android.core.native
+package com.babyvault.android.core.vault
 
 import com.babyvault.core.VaultEngine
 import javax.inject.Inject

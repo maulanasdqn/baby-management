@@ -42,3 +42,94 @@ impl<R: GrowthRepository> LogGrowthUseCase<R> {
         Ok(log)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::growth::entity::GrowthLog;
+    use crate::domain::growth::repository::GrowthRepository;
+    use chrono::{DateTime, Utc};
+    use shared::error_db::RepositoryError;
+    use std::sync::Mutex;
+    use uuid::Uuid;
+
+    struct FakeRepo(Mutex<Vec<GrowthLog>>);
+
+    impl GrowthRepository for FakeRepo {
+        fn find_by_id(&self, id: Uuid) -> Result<Option<GrowthLog>, RepositoryError> {
+            Ok(self.0.lock().unwrap().iter().find(|g| g.id == id).map(|g| GrowthLog {
+                id: g.id, weight_grams: g.weight_grams, height_mm: g.height_mm,
+                notes: g.notes.clone(), logged_at: g.logged_at,
+            }))
+        }
+        fn list_by_range(&self, _: DateTime<Utc>, _: DateTime<Utc>) -> Result<Vec<GrowthLog>, RepositoryError> {
+            Ok(vec![])
+        }
+        fn create(&self, n: NewGrowthLog) -> Result<GrowthLog, RepositoryError> {
+            let g = GrowthLog { id: n.id, weight_grams: n.weight_grams, height_mm: n.height_mm, notes: n.notes, logged_at: n.logged_at };
+            self.0.lock().unwrap().push(GrowthLog { id: g.id, weight_grams: g.weight_grams, height_mm: g.height_mm, notes: g.notes.clone(), logged_at: g.logged_at });
+            Ok(g)
+        }
+        fn delete(&self, id: Uuid) -> Result<(), RepositoryError> {
+            self.0.lock().unwrap().retain(|g| g.id != id);
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn log_with_weight_only_succeeds() {
+        let repo = FakeRepo(Mutex::new(vec![]));
+        let uc = LogGrowthUseCase::new(repo);
+        let result = uc.execute(LogGrowthCommand {
+            weight_grams: Some(3500),
+            height_mm: None,
+            notes: "".into(),
+            logged_at: Utc::now(),
+        });
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().weight_grams, Some(3500));
+    }
+
+    #[test]
+    fn log_with_height_only_succeeds() {
+        let repo = FakeRepo(Mutex::new(vec![]));
+        let uc = LogGrowthUseCase::new(repo);
+        let result = uc.execute(LogGrowthCommand {
+            weight_grams: None,
+            height_mm: Some(510),
+            notes: "3-month check".into(),
+            logged_at: Utc::now(),
+        });
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().height_mm, Some(510));
+    }
+
+    #[test]
+    fn log_with_no_measurements_is_rejected() {
+        let repo = FakeRepo(Mutex::new(vec![]));
+        let uc = LogGrowthUseCase::new(repo);
+        let result = uc.execute(LogGrowthCommand {
+            weight_grams: None,
+            height_mm: None,
+            notes: "no data".into(),
+            logged_at: Utc::now(),
+        });
+        assert!(matches!(result, Err(GrowthError::NoMeasurementProvided)));
+    }
+
+    #[test]
+    fn log_with_both_measurements_succeeds() {
+        let repo = FakeRepo(Mutex::new(vec![]));
+        let uc = LogGrowthUseCase::new(repo);
+        let result = uc.execute(LogGrowthCommand {
+            weight_grams: Some(4000),
+            height_mm: Some(540),
+            notes: "6-month check".into(),
+            logged_at: Utc::now(),
+        });
+        assert!(result.is_ok());
+        let log = result.unwrap();
+        assert_eq!(log.weight_grams, Some(4000));
+        assert_eq!(log.height_mm, Some(540));
+    }
+}

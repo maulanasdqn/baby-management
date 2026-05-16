@@ -56,10 +56,13 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.jna)
+    implementation(libs.jna) { artifact { type = "aar" } }
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
     ksp(libs.hilt.work.compiler)
     debugImplementation(libs.androidx.ui.tooling)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

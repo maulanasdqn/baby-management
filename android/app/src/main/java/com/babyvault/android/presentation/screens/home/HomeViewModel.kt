@@ -2,7 +2,7 @@ package com.babyvault.android.presentation.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.babyvault.android.core.native.VaultEngineProvider
+import com.babyvault.android.core.vault.VaultEngineProvider
 import com.babyvault.android.domain.model.Milestone
 import com.babyvault.android.domain.usecase.ListMilestonesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
