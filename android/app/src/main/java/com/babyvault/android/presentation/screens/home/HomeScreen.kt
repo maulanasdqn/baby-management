@@ -1,61 +1,111 @@
 package com.babyvault.android.presentation.screens.home
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.babyvault.android.presentation.nav.Routes
-import com.babyvault.android.presentation.screens.growth.GrowthScreen
-import com.babyvault.android.presentation.screens.media.MediaScreen
-import com.babyvault.android.presentation.screens.timeline.TimelineScreen
-import com.babyvault.android.presentation.ui.BottomNavBar
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.babyvault.android.presentation.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onNavigateToSettings: () -> Unit) {
-    val tabNavController = rememberNavController()
-    val backStackEntry by tabNavController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
+fun HomeScreen(
+    onNavigate: (String) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsState()
 
-    val title = when (currentRoute) {
-        Routes.Tab.GROWTH -> "Growth Tracker"
-        Routes.Tab.MEDIA -> "Media Vault"
-        else -> "Timeline"
-    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp),
+    ) {
+        Spacer(Modifier.height(24.dp))
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Baby Vault — $title") },
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Sync Settings")
-                    }
-                },
-            )
-        },
-        bottomBar = { BottomNavBar(navController = tabNavController) },
-    ) { padding ->
-        NavHost(
-            navController = tabNavController,
-            startDestination = Routes.Tab.TIMELINE,
-            modifier = Modifier.padding(padding),
+        Text(
+            "Baby Vault",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+        )
+        Text(
+            "Track your baby's moments",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        Text("Quick Log", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            composable(Routes.Tab.TIMELINE) { TimelineScreen() }
-            composable(Routes.Tab.GROWTH) { GrowthScreen() }
-            composable(Routes.Tab.MEDIA) { MediaScreen() }
+            CategoryCard("🍼", "Feed", Peach100, Peach400) { onNavigate("log_feed") }
+            CategoryCard("😴", "Sleep", SkyBlue100, SkyBlue400) { onNavigate("log_sleep") }
+            CategoryCard("🚼", "Diaper", Mint100, Mint400) { onNavigate("log_diaper") }
+            CategoryCard("⭐", "Milestone", Purple100, Purple500) { onNavigate("log_milestone") }
+            CategoryCard("📏", "Growth", Lavender100, Lavender400) { onNavigate("log_growth") }
+            CategoryCard("📷", "Media", Peach100, Peach400) { onNavigate("media") }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text("🔒", style = MaterialTheme.typography.titleLarge)
+                Column {
+                    Text("Vault Active", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        state.engineVersion,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun CategoryCard(
+    emoji: String,
+    label: String,
+    bgColor: Color,
+    accentColor: Color,
+    onClick: () -> Unit,
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.size(width = 100.dp, height = 100.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = bgColor),
+        elevation = CardDefaults.cardElevation(0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(emoji, style = MaterialTheme.typography.headlineSmall)
+            Spacer(Modifier.height(4.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, color = accentColor, fontWeight = FontWeight.SemiBold)
         }
     }
 }

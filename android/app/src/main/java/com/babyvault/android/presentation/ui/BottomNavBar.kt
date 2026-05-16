@@ -1,57 +1,46 @@
 package com.babyvault.android.presentation.ui
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EventNote
-import androidx.compose.material.icons.filled.Photo
-import androidx.compose.material.icons.filled.ShowChart
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.babyvault.android.presentation.nav.Routes
+
+sealed class BottomTab(val route: String, val label: String) {
+    object Home : BottomTab("home", "Home")
+    object History : BottomTab("history", "History")
+    object Insights : BottomTab("insights", "Insights")
+    object Settings : BottomTab("settings", "Settings")
+}
 
 @Composable
-fun BottomNavBar(navController: NavController) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
-
+fun BottomNavBar(currentRoute: String, onNavigate: (String) -> Unit) {
     NavigationBar {
         NavigationBarItem(
-            icon = { Icon(Icons.Default.EventNote, contentDescription = null) },
-            label = { Text("Timeline") },
-            selected = currentRoute == Routes.Tab.TIMELINE,
-            onClick = {
-                navController.navigate(Routes.Tab.TIMELINE) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
+            selected = currentRoute == BottomTab.Home.route,
+            onClick = { onNavigate(BottomTab.Home.route) },
+            icon = { Icon(Icons.Default.Home, null) },
+            label = { Text("Home") },
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.ShowChart, contentDescription = null) },
-            label = { Text("Growth") },
-            selected = currentRoute == Routes.Tab.GROWTH,
-            onClick = {
-                navController.navigate(Routes.Tab.GROWTH) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
+            selected = currentRoute == BottomTab.History.route,
+            onClick = { onNavigate(BottomTab.History.route) },
+            icon = { Icon(Icons.Default.List, null) },
+            label = { Text("History") },
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Photo, contentDescription = null) },
-            label = { Text("Media") },
-            selected = currentRoute == Routes.Tab.MEDIA,
-            onClick = {
-                navController.navigate(Routes.Tab.MEDIA) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
+            selected = currentRoute == BottomTab.Insights.route,
+            onClick = { onNavigate(BottomTab.Insights.route) },
+            icon = { Icon(Icons.Default.BarChart, null) },
+            label = { Text("Insights") },
+        )
+        NavigationBarItem(
+            selected = currentRoute == BottomTab.Settings.route,
+            onClick = { onNavigate(BottomTab.Settings.route) },
+            icon = { Icon(Icons.Default.Settings, null) },
+            label = { Text("Settings") },
         )
     }
 }
