@@ -1,5 +1,4 @@
-// UniFFI-compatible data transfer objects.
-// Uuid → String, DateTime<Utc> → i64 millis, Option<u32> → Option<u32> (uniffi supports this).
+// UniFFI-compatible data transfer objects. Uuid → String, DateTime<Utc> → i64 millis.
 
 #[derive(uniffi::Record)]
 pub struct MilestoneDto {
@@ -26,4 +25,13 @@ pub struct MediaItemDto {
     pub encrypted_path: String,
     pub size_bytes: u64,
     pub created_at_millis: i64,
+}
+
+#[derive(uniffi::Record)]
+pub struct SyncStatusDto {
+    pub pending_milestones: u32,
+    pub pending_growth_logs: u32,
+    pub pending_media_items: u32,
+    pub last_synced_at_millis: Option<i64>,
+    pub is_configured: bool,
 }

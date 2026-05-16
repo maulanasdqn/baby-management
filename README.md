@@ -277,7 +277,7 @@ Tests in `application/*/use_cases/` use in-memory fake repositories — no Andro
 | Phase 1 — Plumbing | Done | Rust workspace, UniFFI bridge, Android project, build pipeline |
 | Phase 2 — Security & DB | Done | ChaCha20 crypto, rusqlite schema, BiometricPrompt key lifecycle |
 | Phase 3 — UI & Features | Done | Bottom nav (Timeline / Growth / Media), milestone FAB sheet, growth log form, PhotoPicker encrypted media vault |
-| Phase 4 — Self-hosted Sync | Planned | Rust `reqwest` sync engine, chunked upload, Android WorkManager |
+| Phase 4 — Self-hosted Sync | Done | Rust `ureq` push engine (ChaCha20 blobs + JSON metadata), SQLite sync_state tracking, Android WorkManager periodic sync (15 min), Sync Settings screen |
 
 ---
 

@@ -5,6 +5,8 @@ object Routes {
     const val UNLOCK = "unlock"
     const val HOME = "home"
 
+    const val SETTINGS = "settings"
+
     object Tab {
         const val TIMELINE = "timeline"
         const val GROWTH = "growth"

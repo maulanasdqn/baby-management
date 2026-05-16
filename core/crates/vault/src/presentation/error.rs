@@ -1,6 +1,7 @@
 use crate::application::growth::error::GrowthError;
 use crate::application::media::error::MediaError;
 use crate::application::milestone::error::MilestoneError;
+use crate::application::sync::error::SyncError;
 use crate::application::vault::error::VaultError;
 use std::fmt;
 
@@ -56,6 +57,17 @@ impl From<MediaError> for FfiError {
                 Self::Crypto { message: m }
             }
             MediaError::Internal(m) => Self::Internal { message: m },
+        }
+    }
+}
+
+impl From<SyncError> for FfiError {
+    fn from(e: SyncError) -> Self {
+        match e {
+            SyncError::NotConfigured => Self::Validation { message: e.to_string() },
+            SyncError::NetworkFailed(m) => Self::Internal { message: m },
+            SyncError::ServerRejected(m) => Self::Internal { message: m },
+            SyncError::Internal(m) => Self::Internal { message: m },
         }
     }
 }

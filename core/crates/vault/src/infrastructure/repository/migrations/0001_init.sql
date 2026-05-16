@@ -21,3 +21,10 @@ CREATE TABLE IF NOT EXISTS media_metadata (
     size_bytes      INTEGER NOT NULL,
     created_at      INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS sync_state (
+    entity_type TEXT NOT NULL,
+    entity_id   TEXT NOT NULL,
+    synced_at   INTEGER NOT NULL,
+    PRIMARY KEY (entity_type, entity_id)
+);

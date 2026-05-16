@@ -15,6 +15,7 @@ use crate::application::milestone::use_cases::detail::DetailMilestoneUseCase;
 use crate::application::milestone::use_cases::list::{
     ListMilestonesCommand, ListMilestonesUseCase,
 };
+use crate::application::sync::use_cases::sync_all::SyncAllUseCase;
 use crate::application::vault::use_cases::init_master_key::InitMasterKeyUseCase;
 use crate::application::vault::use_cases::unlock::{UnlockCommand, UnlockUseCase};
 use crate::infrastructure::crypto::chacha20_engine::ChaCha20Engine;
@@ -22,7 +23,9 @@ use crate::infrastructure::repository::sqlite_growth::SqliteGrowthRepository;
 use crate::infrastructure::repository::sqlite_media::SqliteMediaRepository;
 use crate::infrastructure::repository::sqlite_milestone::SqliteMilestoneRepository;
 use crate::infrastructure::repository::sqlite_pool;
-use crate::presentation::dto::{GrowthLogDto, MediaItemDto, MilestoneDto};
+use crate::infrastructure::sync::http_sync_client::HttpSyncClient;
+use crate::infrastructure::sync::sqlite_sync_repository::SqliteSyncRepository;
+use crate::presentation::dto::{GrowthLogDto, MediaItemDto, MilestoneDto, SyncStatusDto};
 use crate::presentation::error::FfiError;
 use crate::presentation::mappers;
 use chrono::{TimeZone, Utc};
@@ -30,14 +33,21 @@ use std::sync::Mutex;
 use uuid::Uuid;
 use zeroize::Zeroizing;
 
+struct SyncConfig {
+    server_url: String,
+    api_key: String,
+}
+
 #[derive(uniffi::Object)]
 pub struct VaultEngine {
     master_key: Mutex<Option<Zeroizing<Vec<u8>>>>,
     milestone_repo: SqliteMilestoneRepository,
     growth_repo: SqliteGrowthRepository,
     media_repo: SqliteMediaRepository,
+    sync_repo: SqliteSyncRepository,
     crypto: ChaCha20Engine,
     storage_dir: String,
+    sync_config: Mutex<Option<SyncConfig>>,
 }
 
 #[uniffi::export]
@@ -51,9 +61,11 @@ impl VaultEngine {
             master_key: Mutex::new(None),
             milestone_repo: SqliteMilestoneRepository::new(pool.clone()),
             growth_repo: SqliteGrowthRepository::new(pool.clone()),
-            media_repo: SqliteMediaRepository::new(pool),
+            media_repo: SqliteMediaRepository::new(pool.clone()),
+            sync_repo: SqliteSyncRepository::new(pool),
             crypto: ChaCha20Engine,
             storage_dir,
+            sync_config: Mutex::new(None),
         })
     }
 
@@ -200,6 +212,43 @@ impl VaultEngine {
         let items = uc.execute(limit, offset).map_err(FfiError::from)?;
         Ok(items.into_iter().map(mappers::media_item_to_dto).collect())
     }
+
+    // --- Sync ---
+
+    pub fn configure_sync_server(&self, server_url: String, api_key: String) -> Result<(), FfiError> {
+        let mut guard = self
+            .sync_config
+            .lock()
+            .map_err(|e| FfiError::Internal { message: e.to_string() })?;
+        *guard = Some(SyncConfig { server_url, api_key });
+        Ok(())
+    }
+
+    pub fn sync_now(&self) -> Result<SyncStatusDto, FfiError> {
+        let guard = self
+            .sync_config
+            .lock()
+            .map_err(|e| FfiError::Internal { message: e.to_string() })?;
+        let config = guard
+            .as_ref()
+            .ok_or(FfiError::Validation { message: "sync not configured".into() })?;
+
+        let uc = SyncAllUseCase::new(&self.sync_repo, HttpSyncClient);
+        let status = uc.execute(&config.server_url, &config.api_key).map_err(FfiError::from)?;
+        Ok(sync_status_to_dto(status, true))
+    }
+
+    pub fn get_sync_status(&self) -> Result<SyncStatusDto, FfiError> {
+        let is_configured = self
+            .sync_config
+            .lock()
+            .map_err(|e| FfiError::Internal { message: e.to_string() })?
+            .is_some();
+
+        let uc = SyncAllUseCase::new(&self.sync_repo, HttpSyncClient);
+        let status = uc.get_status().map_err(FfiError::from)?;
+        Ok(sync_status_to_dto(status, is_configured))
+    }
 }
 
 impl VaultEngine {
@@ -212,5 +261,15 @@ impl VaultEngine {
             .ok_or(FfiError::Validation {
                 message: "vault is locked — call unlock() first".into(),
             })
+    }
+}
+
+fn sync_status_to_dto(s: crate::domain::sync::entity::SyncStatus, is_configured: bool) -> SyncStatusDto {
+    SyncStatusDto {
+        pending_milestones: s.pending_milestones,
+        pending_growth_logs: s.pending_growth_logs,
+        pending_media_items: s.pending_media_items,
+        last_synced_at_millis: s.last_synced_at_millis,
+        is_configured,
     }
 }

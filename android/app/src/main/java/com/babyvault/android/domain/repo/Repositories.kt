@@ -32,3 +32,9 @@ interface VaultRepository {
     suspend fun generateMasterKey(): Result<ByteArray>
     suspend fun unlock(rawKey: ByteArray): Result<Unit>
 }
+
+interface SyncRepository {
+    suspend fun configureSyncServer(serverUrl: String, apiKey: String): Result<Unit>
+    suspend fun syncNow(): Result<com.babyvault.android.domain.model.SyncStatus>
+    suspend fun getStatus(): Result<com.babyvault.android.domain.model.SyncStatus>
+}

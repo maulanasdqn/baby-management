@@ -57,6 +57,9 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.jna)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
+    ksp(libs.hilt.work.compiler)
     debugImplementation(libs.androidx.ui.tooling)
 }
