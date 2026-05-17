@@ -2,65 +2,132 @@ package com.babyvault.android.presentation.screens.log
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.babyvault.android.presentation.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogSleepScreen(onBack: () -> Unit, viewModel: LogSleepViewModel = hiltViewModel()) {
-    val saved by viewModel.saved.collectAsState()
-    LaunchedEffect(saved) { if (saved) onBack() }
+    LaunchedEffect(Unit) { viewModel.saved.collect { onBack() } }
 
     var durationHours by remember { mutableStateOf("") }
     var durationMins by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
 
     Scaffold(
+        containerColor = NeutralGray,
         topBar = {
             TopAppBar(
-                title = { Text("Log Sleep") },
+                title = {
+                    Text(
+                        "Log Sleep",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = TextPrimary,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = NeutralGray,
+                    scrolledContainerColor = NeutralGray,
+                ),
             )
         },
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 20.dp, vertical = 8.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Text("Duration", style = MaterialTheme.typography.labelLarge)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = durationHours,
-                    onValueChange = { durationHours = it },
-                    label = { Text("Hours") },
-                    modifier = Modifier.weight(1f),
-                )
-                OutlinedTextField(
-                    value = durationMins,
-                    onValueChange = { durationMins = it },
-                    label = { Text("Minutes") },
-                    modifier = Modifier.weight(1f),
-                )
+            // Icon header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = SkyBlue100,
+                    modifier = Modifier.size(52.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Filled.Bedtime,
+                            contentDescription = null,
+                            tint = SkyBlue400,
+                            modifier = Modifier.size(28.dp),
+                        )
+                    }
+                }
+                Column {
+                    Text(
+                        "Log Sleep",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = TextPrimary,
+                    )
+                    Text(
+                        "Record a sleep session",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                    )
+                }
             }
+
+            // Duration row
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "Duration",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = TextPrimary,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = durationHours,
+                        onValueChange = { durationHours = it },
+                        label = { Text("Hours") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(14.dp),
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = durationMins,
+                        onValueChange = { durationMins = it },
+                        label = { Text("Minutes") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(14.dp),
+                        singleLine = true,
+                    )
+                }
+            }
+
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
-                label = { Text("Notes") },
+                label = { Text("Notes (optional)") },
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                minLines = 2,
             )
+
             Button(
                 onClick = {
                     val totalMins = ((durationHours.toIntOrNull() ?: 0) * 60) + (durationMins.toIntOrNull() ?: 0)
@@ -68,8 +135,19 @@ fun LogSleepScreen(onBack: () -> Unit, viewModel: LogSleepViewModel = hiltViewMo
                     val startMillis = endMillis - (totalMins * 60_000L)
                     viewModel.save(startMillis, endMillis, notes)
                 },
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("Save") }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Teal500),
+            ) {
+                Text(
+                    "Save",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
