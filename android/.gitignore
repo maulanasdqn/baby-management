@@ -1,1 +1,4 @@
 *.hprof
+*.jks
+*.keystore
+local.properties
