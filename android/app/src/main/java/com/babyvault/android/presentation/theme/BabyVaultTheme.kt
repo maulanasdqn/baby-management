@@ -2,27 +2,33 @@ package com.babyvault.android.presentation.theme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+
 private val LightColorScheme = lightColorScheme(
-    primary = Teal500,
-    onPrimary = Color.White,
-    primaryContainer = Teal100,
-    onPrimaryContainer = Teal700,
-    secondary = Rose400,
-    onSecondary = Color.White,
-    secondaryContainer = Rose100,
+    primary              = NavyPrimary,
+    onPrimary            = Color.White,
+    primaryContainer     = Lavender100,
+    onPrimaryContainer   = Navy900,
+    secondary            = PinkAccent,
+    onSecondary          = Color.White,
+    secondaryContainer   = PinkLight,
     onSecondaryContainer = Color(0xFF7A1D3A),
-    tertiary = Sage400,
-    onTertiary = Color.White,
-    tertiaryContainer = Sage100,
-    onTertiaryContainer = Color(0xFF14532D),
-    background = NeutralGray,
-    onBackground = TextPrimary,
-    surface = CardSurface,
-    onSurface = TextPrimary,
-    surfaceVariant = Teal100,
-    onSurfaceVariant = TextSecondary,
-    outline = Teal200,
+    tertiary             = Teal500,
+    onTertiary           = Color.White,
+    tertiaryContainer    = Teal100,
+    onTertiaryContainer  = Navy800,
+    background           = WarmCream,
+    onBackground         = TextPrimary,
+    surface              = CardWhite,
+    onSurface            = TextPrimary,
+    surfaceVariant       = WarmCream,
+    onSurfaceVariant     = TextSecondary,
+    outline              = Color(0xFFDDDFEE),
+    error                = Color(0xFFEF4444),
+    onError              = Color.White,
+    errorContainer       = Color(0xFFFEE2E2),
+    onErrorContainer     = Color(0xFF7F1D1D),
 )
+
 @Composable
 fun BabyVaultTheme(content: @Composable () -> Unit) {
     MaterialTheme(
