@@ -2,6 +2,7 @@ package com.babyvault.android.presentation.screens.insights
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.babyvault.android.domain.model.FeedType
 import com.babyvault.android.domain.usecase.ListDiaperByRangeUseCase
 import com.babyvault.android.domain.usecase.ListFeedByRangeUseCase
 import com.babyvault.android.domain.usecase.ListSleepByRangeUseCase
@@ -19,6 +20,9 @@ data class InsightsState(
     val sleepCount: Int = 0,
     val diaperCount: Int = 0,
     val sleepMinutesByDay: Map<String, Long> = emptyMap(),
+    val breastFeeds: Int = 0,
+    val bottleFeeds: Int = 0,
+    val solidFeeds: Int = 0,
 )
 
 @HiltViewModel
@@ -55,6 +59,9 @@ class InsightsViewModel @Inject constructor(
                 sleepCount = sleeps.size,
                 diaperCount = diapers.size,
                 sleepMinutesByDay = sleepByDay,
+                breastFeeds = feeds.count { it.feedType == FeedType.BREAST },
+                bottleFeeds = feeds.count { it.feedType == FeedType.BOTTLE },
+                solidFeeds = feeds.count { it.feedType == FeedType.SOLID },
             )
         }
     }
