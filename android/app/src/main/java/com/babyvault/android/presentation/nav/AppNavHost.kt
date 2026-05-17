@@ -1,6 +1,7 @@
 package com.babyvault.android.presentation.nav
 import android.app.Activity
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -81,7 +82,7 @@ fun AppNavHost() {
         NavHost(
             navController = navController,
             startDestination = Routes.SPLASH,
-            modifier = Modifier.padding(padding),
+            modifier = Modifier.padding(padding).consumeWindowInsets(padding),
         ) {
             composable(Routes.SPLASH) {
                 SplashScreen(
