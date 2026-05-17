@@ -1,28 +1,21 @@
 package com.babyvault.android.presentation.screens.chat
+
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelSetupScreen(
@@ -30,10 +23,10 @@ fun ModelSetupScreen(
     viewModel: ModelSetupViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-    var tokenVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(state.isReady) {
-        if (state.isReady) onBack()
-    }
+
+    LaunchedEffect(Unit) { viewModel.initialize() }
+    LaunchedEffect(state.isReady) { if (state.isReady) onBack() }
+
     Scaffold(
         containerColor = NeutralGray,
         topBar = {
@@ -58,80 +51,37 @@ fun ModelSetupScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
-            Spacer(Modifier.height(16.dp))
             Surface(shape = CircleShape, color = Teal100, modifier = Modifier.size(80.dp)) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.CloudDownload, null, tint = Teal600, modifier = Modifier.size(40.dp))
+                    Icon(Icons.Default.SmartToy, null, tint = Teal600, modifier = Modifier.size(40.dp))
                 }
             }
+
             Text(
-                "Gemma 3 1B",
+                "Gemini Nano",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 color = TextPrimary,
             )
             Text(
-                "Download the on-device AI model (~2.3 GB).\nInference runs entirely on your phone — no data leaves your device.",
+                "Uses the AI model built into your Android system — no download needed. Your data never leaves your device.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary,
                 textAlign = TextAlign.Center,
             )
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Icon(Icons.Default.Key, null, tint = Teal600, modifier = Modifier.size(16.dp))
-                    Text(
-                        "HuggingFace Token",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = TextPrimary,
-                    )
-                }
-                OutlinedTextField(
-                    value = state.hfToken,
-                    onValueChange = { viewModel.setToken(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("hf_…", style = MaterialTheme.typography.bodySmall, color = TextSecondary) },
-                    shape = RoundedCornerShape(14.dp),
-                    singleLine = true,
-                    visualTransformation = if (tokenVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { tokenVisible = !tokenVisible }) {
-                            Icon(
-                                if (tokenVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = null,
-                                tint = TextSecondary,
-                            )
-                        }
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Teal500,
-                        unfocusedBorderColor = NeutralGray,
-                    ),
-                )
-                Text(
-                    "Required — accept the Gemma license at huggingface.co/google/gemma-3-1b-it, then create a token at huggingface.co/settings/tokens",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextSecondary,
-                )
-            }
+
             when {
-                state.isDownloading -> {
+                state.isChecking -> {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        LinearProgressIndicator(
-                            progress = { state.progress },
-                            modifier = Modifier.fillMaxWidth().height(8.dp),
-                            color = Teal500,
-                            trackColor = Teal100,
-                        )
+                        CircularProgressIndicator(color = Teal500)
                         Text(
-                            "${(state.progress * 100).toInt()}%  •  ${state.statusText}",
+                            "Connecting to Gemini Nano…",
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary,
                         )
@@ -143,38 +93,46 @@ fun ModelSetupScreen(
                         color = MaterialTheme.colorScheme.errorContainer,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(
-                            state.error!!,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.padding(12.dp),
-                        )
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                "Gemini Nano not available on this device",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                            Text(
+                                state.error!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                        }
                     }
+                    Text(
+                        "The chatbot will still work in basic mode with built-in responses.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center,
+                    )
                     Button(
-                        onClick = { viewModel.startDownload() },
+                        onClick = { viewModel.initialize() },
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Teal500),
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                        enabled = state.hfToken.isNotBlank(),
                     ) { Text("Retry") }
+                    OutlinedButton(
+                        onClick = onBack,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                    ) { Text("Use Basic Mode") }
                 }
                 else -> {
                     Button(
-                        onClick = { viewModel.startDownload() },
+                        onClick = { viewModel.initialize() },
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Teal500),
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                        enabled = state.hfToken.isNotBlank(),
-                    ) { Text("Download Model") }
+                    ) { Text("Connect to Gemini Nano") }
                 }
             }
-            Text(
-                "Wi-Fi recommended. Stored in app-private storage, never shared.",
-                style = MaterialTheme.typography.labelSmall,
-                color = TextSecondary,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(8.dp))
         }
     }
 }

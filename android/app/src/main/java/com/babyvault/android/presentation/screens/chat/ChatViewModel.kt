@@ -23,7 +23,7 @@ class ChatViewModel @Inject constructor(
     private var nextId = 0L
     private var genJob: Job? = null
     init {
-        _state.update { it.copy(modelReady = ai.isModelReady()) }
+        _state.update { it.copy(modelReady = ai.isReady()) }
     }
     fun send(text: String) {
         if (text.isBlank() || _state.value.isGenerating) return
@@ -33,7 +33,7 @@ class ChatViewModel @Inject constructor(
         val assistantId = placeholder.id
         genJob = viewModelScope.launch {
             val sb = StringBuilder()
-            ai.generate(buildPrompt(userMsg.text)).collect { token ->
+            ai.generate(userMsg.text).collect { token ->
                 sb.append(token)
                 _state.update { s ->
                     s.copy(messages = s.messages.map { m ->
@@ -63,15 +63,6 @@ class ChatViewModel @Inject constructor(
         }
     }
     fun refreshModelStatus() {
-        _state.update { it.copy(modelReady = ai.isModelReady()) }
-    }
-    private fun buildPrompt(userText: String): String {
-        val history = _state.value.messages
-            .filterNot { it.isStreaming }
-            .takeLast(10)
-            .joinToString("\n") { m ->
-                if (m.sender == Sender.User) "User: ${m.text}" else "Assistant: ${m.text}"
-            }
-        return "$history\nUser: $userText\nAssistant:"
+        _state.update { it.copy(modelReady = ai.isReady()) }
     }
 }
