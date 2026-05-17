@@ -34,8 +34,8 @@ android {
 
     sourceSets {
         getByName("main") {
-            java.srcDirs("src/main/java", "../libs/vault/kotlin")
-            jniLibs.srcDirs("../libs/vault/jniLibs")
+            java.srcDirs("src/main/java", "../libs/vault/kotlin", "../libs/inference/kotlin")
+            jniLibs.srcDirs("../libs/vault/jniLibs", "../libs/inference/jniLibs")
         }
     }
 }

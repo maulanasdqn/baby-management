@@ -12,6 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.babyvault.android.presentation.screens.chat.ChatScreen
+import com.babyvault.android.presentation.screens.chat.ModelSetupScreen
 import com.babyvault.android.presentation.screens.growth.GrowthScreen
 import com.babyvault.android.presentation.screens.history.HistoryScreen
 import com.babyvault.android.presentation.screens.home.HomeScreen
@@ -32,10 +34,10 @@ private val bottomNavRoutes = setOf(
     Routes.HOME,
     Routes.HISTORY,
     Routes.INSIGHTS,
+    Routes.CHAT,
     Routes.SETTINGS,
 )
 
-// Routes where status bar icons should be dark (light background screens)
 private val lightStatusBarRoutes = setOf(
     Routes.HOME,
     Routes.HISTORY,
@@ -48,6 +50,8 @@ private val lightStatusBarRoutes = setOf(
     Routes.LOG_MILESTONE,
     Routes.LOG_GROWTH,
     Routes.FEED_TIMER,
+    Routes.CHAT,
+    Routes.MODEL_SETUP,
 )
 
 @Composable
@@ -159,6 +163,12 @@ fun AppNavHost() {
             }
             composable(Routes.LOG_GROWTH) {
                 GrowthScreen()
+            }
+            composable(Routes.CHAT) {
+                ChatScreen(onSetupModel = { navController.navigate(Routes.MODEL_SETUP) })
+            }
+            composable(Routes.MODEL_SETUP) {
+                ModelSetupScreen(onBack = { navController.popBackStack() })
             }
         }
     }

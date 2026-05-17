@@ -1,0 +1,26 @@
+namespace inference {};
+
+callback interface StreamCallback {
+    void on_token(string token);
+    void on_done();
+    void on_error(string message);
+};
+
+interface InferenceEngine {
+    [Throws=InferenceError]
+    constructor(string model_dir);
+
+    [Throws=InferenceError]
+    void generate(string prompt, StreamCallback callback, u32 max_tokens);
+
+    boolean is_ready();
+    string model_info();
+};
+
+[Error]
+enum InferenceError {
+    "ModelNotFound",
+    "TokenizerError",
+    "InferenceError",
+    "InvalidInput",
+};

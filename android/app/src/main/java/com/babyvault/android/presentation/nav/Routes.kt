@@ -15,4 +15,6 @@ object Routes {
     const val INSIGHTS = "insights"
     const val SETTINGS = "settings"
     const val MEDIA = "media"
+    const val CHAT = "chat"
+    const val MODEL_SETUP = "model_setup"
 }
