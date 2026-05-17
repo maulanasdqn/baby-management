@@ -33,9 +33,6 @@ fun ChatScreen(
     ) {
         ChatHeader()
         HorizontalDivider()
-        if (!state.modelReady) {
-            ModelBanner(onSetup = onSetupModel)
-        }
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -53,27 +50,6 @@ fun ChatScreen(
             onSend = { viewModel.send(it) },
             onStop = { viewModel.cancelGeneration() },
         )
-    }
-}
-@Composable
-private fun ModelBanner(onSetup: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Teal100)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            "AI model not loaded",
-            style = MaterialTheme.typography.bodySmall,
-            color = Teal700,
-            modifier = Modifier.weight(1f),
-        )
-        TextButton(onClick = onSetup) {
-            Text("Setup", color = Teal600)
-        }
     }
 }
 @Composable
