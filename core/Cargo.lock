@@ -1239,6 +1239,7 @@ dependencies = [
  "burn",
  "bytemuck",
  "memmap2",
+ "nnapi",
  "regex",
  "safetensors",
  "serde",
@@ -1435,6 +1436,13 @@ dependencies = [
  "portable-atomic",
  "portable-atomic-util",
  "rawpointer",
+]
+
+[[package]]
+name = "nnapi"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
 ]
 
 [[package]]
