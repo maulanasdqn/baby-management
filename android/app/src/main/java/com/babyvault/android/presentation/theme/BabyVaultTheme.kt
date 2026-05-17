@@ -1,24 +1,22 @@
 package com.babyvault.android.presentation.theme
 
-import android.os.Build
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
 private val LightColorScheme = lightColorScheme(
     primary = Teal500,
     onPrimary = Color.White,
     primaryContainer = Teal100,
     onPrimaryContainer = Teal700,
-    secondary = Peach400,
+    secondary = Rose400,
     onSecondary = Color.White,
-    secondaryContainer = Peach100,
-    onSecondaryContainer = Color(0xFF5C2A15),
-    tertiary = Mint400,
+    secondaryContainer = Rose100,
+    onSecondaryContainer = Color(0xFF7A1D3A),
+    tertiary = Sage400,
     onTertiary = Color.White,
-    tertiaryContainer = Mint100,
-    onTertiaryContainer = Color(0xFF004D33),
+    tertiaryContainer = Sage100,
+    onTertiaryContainer = Color(0xFF14532D),
     background = NeutralGray,
     onBackground = TextPrimary,
     surface = CardSurface,
@@ -30,14 +28,8 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun BabyVaultTheme(content: @Composable () -> Unit) {
-    val colorScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val context = LocalContext.current
-        dynamicLightColorScheme(context)
-    } else {
-        LightColorScheme
-    }
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = LightColorScheme,
         typography = Typography,
         content = content,
     )

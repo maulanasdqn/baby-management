@@ -4,11 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babyvault.android.domain.model.FeedType
 import com.babyvault.android.domain.usecase.LogFeedUseCase
+import com.babyvault.android.presentation.utils.formatElapsedSeconds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,12 +21,7 @@ data class FeedTimerState(
     val isRunning: Boolean = false,
     val side: String = "Left",
 ) {
-    val elapsedLabel: String get() {
-        val h = elapsedSeconds / 3600
-        val m = (elapsedSeconds % 3600) / 60
-        val s = elapsedSeconds % 60
-        return if (h > 0) "%02d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
-    }
+    val elapsedLabel: String get() = formatElapsedSeconds(elapsedSeconds)
 }
 
 @HiltViewModel
@@ -31,8 +29,8 @@ class FeedTimerViewModel @Inject constructor(private val logFeed: LogFeedUseCase
     private val _state = MutableStateFlow(FeedTimerState())
     val state: StateFlow<FeedTimerState> = _state
 
-    private val _saved = MutableStateFlow(false)
-    val saved: StateFlow<Boolean> = _saved
+    private val _saved = Channel<Unit>(Channel.BUFFERED)
+    val saved = _saved.receiveAsFlow()
 
     private var timerJob: Job? = null
 
@@ -64,7 +62,7 @@ class FeedTimerViewModel @Inject constructor(private val logFeed: LogFeedUseCase
                 side = side,
                 notes = "",
             )
-            _saved.value = true
+            _saved.send(Unit)
         }
     }
 

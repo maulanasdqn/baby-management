@@ -6,6 +6,7 @@ import com.babyvault.android.domain.model.FeedType
 import com.babyvault.android.domain.usecase.ListDiaperByRangeUseCase
 import com.babyvault.android.domain.usecase.ListFeedByRangeUseCase
 import com.babyvault.android.domain.usecase.ListSleepByRangeUseCase
+import com.babyvault.android.presentation.utils.formatAvgSleep
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ data class InsightsState(
     val feedCount: Int = 0,
     val sleepCount: Int = 0,
     val diaperCount: Int = 0,
+    val avgSleepLabel: String = "No data",
     val sleepMinutesByDay: Map<String, Long> = emptyMap(),
     val breastFeeds: Int = 0,
     val bottleFeeds: Int = 0,
@@ -54,10 +56,14 @@ class InsightsViewModel @Inject constructor(
                 sleepByDay[name] = (sleepByDay[name] ?: 0L) + s.durationMinutes
             }
 
+            val avgMinutes = sleeps.map { it.durationMinutes }.filter { it > 0 }
+                .let { if (it.isEmpty()) 0L else it.average().toLong() }
+
             _state.value = InsightsState(
                 feedCount = feeds.size,
                 sleepCount = sleeps.size,
                 diaperCount = diapers.size,
+                avgSleepLabel = formatAvgSleep(avgMinutes),
                 sleepMinutesByDay = sleepByDay,
                 breastFeeds = feeds.count { it.feedType == FeedType.BREAST },
                 bottleFeeds = feeds.count { it.feedType == FeedType.BOTTLE },

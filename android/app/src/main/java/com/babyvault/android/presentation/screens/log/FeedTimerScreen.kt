@@ -22,8 +22,7 @@ import com.babyvault.android.presentation.theme.*
 @Composable
 fun FeedTimerScreen(onBack: () -> Unit, viewModel: FeedTimerViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
-    val saved by viewModel.saved.collectAsState()
-    LaunchedEffect(saved) { if (saved) onBack() }
+    LaunchedEffect(Unit) { viewModel.saved.collect { onBack() } }
 
     Scaffold(
         containerColor = NeutralGray,
