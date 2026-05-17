@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["apps/config", "apps/vault", "apps/inference"]
+members = ["apps/config", "apps/vault"]
 
 [workspace.dependencies]
 uuid = { version = "1", features = ["v4"] }

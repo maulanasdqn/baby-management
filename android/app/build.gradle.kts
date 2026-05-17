@@ -1,16 +1,9 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
-}
-
-val localProps = Properties().apply {
-    val f = rootProject.file("local.properties")
-    if (f.exists()) load(f.inputStream())
 }
 
 android {
@@ -23,7 +16,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "HF_TOKEN", "\"${localProps.getProperty("HF_TOKEN", "")}\"")
     }
 
     buildTypes {
@@ -38,12 +30,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true; buildConfig = true }
+    buildFeatures { compose = true }
 
     sourceSets {
         getByName("main") {
-            java.srcDirs("src/main/java", "../libs/vault/kotlin", "../libs/inference/kotlin")
-            jniLibs.srcDirs("../libs/vault/jniLibs", "../libs/inference/jniLibs")
+            java.srcDirs("src/main/java", "../libs/vault/kotlin")
+            jniLibs.srcDirs("../libs/vault/jniLibs")
         }
     }
 }
