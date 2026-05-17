@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ModelSetupState(
+    val hfToken: String = "",
     val isDownloading: Boolean = false,
     val progress: Float = 0f,
     val statusText: String = "",
@@ -32,15 +33,19 @@ class ModelSetupViewModel @Inject constructor(
         if (downloader.isDownloaded()) loadModel()
     }
 
+    fun setToken(token: String) {
+        _state.update { it.copy(hfToken = token, error = null) }
+    }
+
     fun startDownload() {
         if (_state.value.isDownloading) return
         _state.update { it.copy(isDownloading = true, error = null, progress = 0f) }
         viewModelScope.launch {
             runCatching {
-                downloader.download().collect { progress ->
+                downloader.download(_state.value.hfToken).collect { progress ->
                     val mb = progress.bytesDownloaded / 1_000_000
                     val totalMb = progress.totalBytes / 1_000_000
-                    _state.update { it.copy(progress = progress.fraction, statusText = "${mb}MB / ${totalMb}MB") }
+                    _state.update { it.copy(progress = progress.fraction, statusText = "${mb} MB / ${totalMb} MB") }
                 }
             }.onFailure { e ->
                 _state.update { it.copy(isDownloading = false, error = e.message ?: "Download failed") }
