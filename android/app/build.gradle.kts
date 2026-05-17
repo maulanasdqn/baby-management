@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.babyvault.android"
-        minSdk = 31
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -34,8 +34,15 @@ android {
 
     sourceSets {
         getByName("main") {
-            java.srcDirs("src/main/java", "../libs/vault/kotlin")
-            jniLibs.srcDirs("../libs/vault/jniLibs")
+            java.srcDirs(
+                "src/main/java",
+                "../libs/vault/kotlin",
+                "../libs/inference/kotlin",
+            )
+            jniLibs.srcDirs(
+                "../libs/vault/jniLibs",
+                "../libs/inference/jniLibs",
+            )
         }
     }
 }
@@ -59,7 +66,6 @@ dependencies {
     implementation(libs.jna) { artifact { type = "aar" } }
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.hilt.work)
-    implementation(libs.aicore)
     ksp(libs.hilt.compiler)
     ksp(libs.hilt.work.compiler)
     debugImplementation(libs.androidx.ui.tooling)

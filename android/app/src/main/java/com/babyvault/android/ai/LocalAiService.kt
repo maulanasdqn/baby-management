@@ -1,96 +1,86 @@
 package com.babyvault.android.ai
+
 import android.content.Context
-import com.google.ai.edge.aicore.GenerativeModel
-import com.google.ai.edge.aicore.generationConfig
+import com.babyvault.inference.NativeInferenceEngine
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+
 @Singleton
-class LocalAiService @Inject constructor(@ApplicationContext private val context: Context) {
-    private var model: GenerativeModel? = null
-    private var aiCoreAvailable = false
-    companion object {
-        private const val SYSTEM_PROMPT = """You are Baby AI, a friendly baby-care assistant built into a baby tracking app.
-You ONLY answer questions about: feeding, breastfeeding, formula, baby sleep, diapers, growth, developmental milestones, teething, baby health, bathing, tummy time, and newborn care.
-If the user asks about anything unrelated to baby care (programming, politics, sports, technology, etc.), politely decline and redirect them to baby-care topics.
-Keep answers concise, warm, and evidence-based. Always recommend consulting a pediatrician for medical concerns.
-"""
+class LocalAiService @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
+    private var engine: NativeInferenceEngine? = null
+
+    fun modelDir(): File = File(context.filesDir, "inference_model")
+
+    fun isModelDownloaded(): Boolean {
+        val dir = modelDir()
+        return dir.resolve("model.safetensors").exists() &&
+               dir.resolve("vocab.json").exists() &&
+               dir.resolve("merges.txt").exists()
     }
-    suspend fun initialize(): AiCoreStatus {
+
+    fun isReady(): Boolean = engine?.isReady() == true
+
+    fun initialize(): InferenceStatus {
+        if (!isModelDownloaded()) return InferenceStatus.ModelMissing
         return try {
-            val cfg = generationConfig {
-                this.context = this@LocalAiService.context
-                temperature = 0.2f
-                topK = 16
-                maxOutputTokens = 512
-            }
-            model = GenerativeModel(cfg)
-            aiCoreAvailable = true
-            AiCoreStatus.Available
-        } catch (e: Exception) {
-            aiCoreAvailable = false
-            AiCoreStatus.Unavailable(e.message ?: "AICore not supported on this device")
-        }
-    }
-    fun isReady(): Boolean = aiCoreAvailable && model != null
-    fun generate(userMessage: String): Flow<String> = flow {
-        val m = model
-        if (!aiCoreAvailable || m == null) {
-            stubReply(userMessage).forEach { emit(it) }
-            return@flow
-        }
-        val prompt = buildPrompt(userMessage)
-        try {
-            m.generateContentStream(prompt).collect { chunk ->
-                chunk.text?.let { emit(it) }
+            System.loadLibrary("inference")
+            val eng = NativeInferenceEngine(modelDir().absolutePath)
+            if (eng.isReady()) {
+                engine = eng
+                InferenceStatus.Ready
+            } else {
+                InferenceStatus.Error("Failed to load model weights")
             }
         } catch (e: Exception) {
-            emit("Sorry, something went wrong. Please try again.")
+            InferenceStatus.Error(e.message ?: "unknown error")
         }
     }
-    private fun buildPrompt(userMessage: String): String =
-        "$SYSTEM_PROMPT\nUser: $userMessage\nAssistant:"
-    private fun stubReply(userMessage: String): List<String> {
-        val q = userMessage.lowercase()
-        val reply = when {
-            isOffTopic(q) ->
-                "I'm a baby-care assistant and can only help with topics related to your baby — feeding, sleep, diapers, growth, and milestones."
-            anyOf(q, "who are you", "what are you") ->
-                "I'm Baby AI, your on-device baby-care assistant powered by Gemini Nano."
-            anyOf(q, "walk", "walking", "first step") ->
-                "Most babies take first steps between 9–12 months, though 9–15 months is normal."
-            anyOf(q, "feed", "feeding", "breastfeed", "bottle", "formula", "milk") ->
+
+    fun generate(userMessage: String): Flow<String> {
+        val eng = engine
+        if (eng == null || !eng.isReady()) {
+            return flow { emit(stubReply(userMessage)) }
+        }
+        return flow {
+            val stream = eng.generateStream(userMessage, 200u)
+            while (true) {
+                val token = stream.nextToken() ?: break
+                emit(token)
+            }
+        }.flowOn(Dispatchers.IO)
+    }
+
+    private fun stubReply(q: String): String {
+        val lower = q.lowercase()
+        return when {
+            anyOf(lower, "feed", "feeding", "formula", "milk", "breastfeed") ->
                 "Newborns feed every 2–3 hours. By 3 months: every 3–4 hours. Introduce solids around 6 months."
-            anyOf(q, "sleep", "nap", "night") ->
-                "Newborns sleep 14–17 hours/day. A consistent bedtime routine helps establish healthy sleep habits."
-            anyOf(q, "diaper", "poop", "pee") ->
-                "Expect 6–8 wet diapers per day after day 4. Fewer may indicate dehydration."
-            anyOf(q, "growth", "weight", "milestone", "develop") ->
+            anyOf(lower, "sleep", "nap", "night", "bedtime") ->
+                "Newborns need 14–17 hours of sleep. A consistent bedtime routine helps."
+            anyOf(lower, "diaper", "poop", "pee", "wet") ->
+                "After day 4, expect 6–8 wet diapers per day. Fewer may signal dehydration."
+            anyOf(lower, "growth", "weight", "height", "milestone", "develop") ->
                 "Babies gain ~150–200 g/week in the first 3 months and grow ~2.5 cm/month."
+            anyOf(lower, "walk", "crawl", "talk", "first step") ->
+                "Most babies take first steps between 9–12 months. Every baby develops at their own pace."
             else ->
-                "AICore (Gemini Nano) is not available on this device. I'm running in basic mode — I can help with feeding, sleep, diapers, and growth questions."
+                "The on-device model is not loaded yet. Download it from the AI Setup screen."
         }
-        return reply.split(" ").map { "$it " }
     }
+
     private fun anyOf(text: String, vararg keywords: String) = keywords.any { it in text }
-    private fun isOffTopic(q: String): Boolean {
-        val offTopicPatterns = listOf(
-            "rust", "kotlin", "java", "python", "code", "programming", "software",
-            "hello world", "algorithm", "database", "server", "api",
-            "politics", "religion", "president", "election", "war",
-            "stock", "crypto", "bitcoin", "recipe", "cooking",
-            "sport", "football", "movie", "music", "game", "weather",
-        )
-        val babyWords = listOf(
-            "baby", "infant", "newborn", "toddler", "child",
-            "feed", "sleep", "diaper", "growth", "milk", "formula",
-        )
-        return offTopicPatterns.any { it in q } && babyWords.none { it in q }
-    }
 }
-sealed class AiCoreStatus {
-    object Available : AiCoreStatus()
-    data class Unavailable(val reason: String) : AiCoreStatus()
+
+sealed class InferenceStatus {
+    object Ready : InferenceStatus()
+    object ModelMissing : InferenceStatus()
+    data class Error(val reason: String) : InferenceStatus()
 }
