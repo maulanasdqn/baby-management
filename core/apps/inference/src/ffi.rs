@@ -16,7 +16,7 @@ impl Backend {
     {
         match self {
             Backend::Nnapi(e) => e.generate(prompt, max_tokens, on_token),
-            Backend::Burn(e) => e.generate(prompt, max_tokens, on_token),
+            Backend::Burn(e)  => e.generate(prompt, max_tokens, on_token),
         }
     }
 }
@@ -35,21 +35,38 @@ impl TokenStream {
 
 #[derive(uniffi::Object)]
 pub struct NativeInferenceEngine {
-    backend: Arc<Mutex<Option<Backend>>>,
+    backend:    Arc<Mutex<Option<Backend>>>,
+    load_error: Arc<Mutex<Option<String>>>,
 }
 
 #[uniffi::export]
 impl NativeInferenceEngine {
     #[uniffi::constructor]
     pub fn new(model_dir: String) -> Arc<Self> {
-        // Try NNAPI first; fall back to Burn if compilation fails (e.g., API < 31 or emulator).
+        let mut last_err: Option<String> = None;
+
+        // Try NNAPI first; on failure capture error and try Burn CPU.
         let backend = NnapiInferenceEngine::load(&model_dir)
             .map(Backend::Nnapi)
-            .or_else(|_| InferenceEngine::load(&model_dir).map(Backend::Burn))
+            .or_else(|e_nnapi| {
+                last_err = Some(format!("{:#}", e_nnapi));
+                InferenceEngine::load(&model_dir)
+                    .map(Backend::Burn)
+                    .map_err(|e_burn| {
+                        // Burn error is more user-readable (tensor names etc.)
+                        last_err = Some(format!("{:#}", e_burn));
+                        e_burn
+                    })
+            })
             .ok();
 
+        if backend.is_some() {
+            last_err = None;
+        }
+
         Arc::new(Self {
-            backend: Arc::new(Mutex::new(backend)),
+            backend:    Arc::new(Mutex::new(backend)),
+            load_error: Arc::new(Mutex::new(last_err)),
         })
     }
 
@@ -57,13 +74,18 @@ impl NativeInferenceEngine {
         self.backend.lock().map(|g| g.is_some()).unwrap_or(false)
     }
 
+    /// Returns the Rust error string when is_ready() == false.
+    pub fn load_error(&self) -> Option<String> {
+        self.load_error.lock().ok()?.clone()
+    }
+
     pub fn generate_stream(&self, prompt: String, max_tokens: u32) -> Arc<TokenStream> {
         let (tx, rx) = mpsc::channel::<Option<String>>();
-        let backend = Arc::clone(&self.backend);
+        let backend  = Arc::clone(&self.backend);
 
         std::thread::spawn(move || {
             let guard = match backend.lock() {
-                Ok(g) => g,
+                Ok(g)  => g,
                 Err(_) => { let _ = tx.send(None); return; }
             };
             if let Some(b) = guard.as_ref() {

@@ -37,7 +37,8 @@ class LocalAiService @Inject constructor(
                 engine = eng
                 InferenceStatus.Ready
             } else {
-                InferenceStatus.Error("Failed to load model weights")
+                val reason = eng.loadError() ?: "Engine returned not-ready with no error detail"
+                InferenceStatus.Error(reason)
             }
         } catch (e: Exception) {
             InferenceStatus.Error(e.message ?: "unknown error")

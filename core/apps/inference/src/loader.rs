@@ -13,14 +13,23 @@ pub fn load_gpt2<B: Backend>(model_dir: &str, device: &B::Device) -> Result<Gpt2
     let tensors = SafeTensors::deserialize(&mmap)?;
     let config = Gpt2Config::gpt2_small();
 
-    let wte = load_2d::<B>(&tensors, "wte.weight", device)?;
-    let wpe = load_2d::<B>(&tensors, "wpe.weight", device)?;
-    let ln_f_w = load_1d::<B>(&tensors, "ln_f.weight", device)?;
-    let ln_f_b = load_1d::<B>(&tensors, "ln_f.bias", device)?;
+    // HuggingFace GPT-2 safetensors (openai-community/gpt2) prefixes every
+    // tensor with "transformer."; raw/converted checkpoints may not.
+    let prefix = if tensors.names().iter().any(|n| n.starts_with("transformer.")) {
+        "transformer."
+    } else {
+        ""
+    };
+    let tp = |s: &str| format!("{}{}", prefix, s);
+
+    let wte    = load_2d::<B>(&tensors, &tp("wte.weight"),  device)?;
+    let wpe    = load_2d::<B>(&tensors, &tp("wpe.weight"),  device)?;
+    let ln_f_w = load_1d::<B>(&tensors, &tp("ln_f.weight"), device)?;
+    let ln_f_b = load_1d::<B>(&tensors, &tp("ln_f.bias"),   device)?;
 
     let mut blocks = Vec::with_capacity(config.n_layer);
     for i in 0..config.n_layer {
-        blocks.push(load_block::<B>(&tensors, i, &config, device)?);
+        blocks.push(load_block::<B>(&tensors, i, &config, device, prefix)?);
     }
 
     Ok(Gpt2 { wte, wpe, blocks, ln_f_w, ln_f_b, config })
@@ -31,8 +40,9 @@ fn load_block<B: Backend>(
     idx: usize,
     config: &Gpt2Config,
     device: &B::Device,
+    prefix: &str,
 ) -> Result<Block<B>> {
-    let p = |s: &str| format!("h.{}.{}", idx, s);
+    let p = |s: &str| format!("{}h.{}.{}", prefix, idx, s);
     Ok(Block {
         ln1_w:      load_1d::<B>(tensors, &p("ln_1.weight"),        device)?,
         ln1_b:      load_1d::<B>(tensors, &p("ln_1.bias"),          device)?,
@@ -99,8 +109,8 @@ fn as_f32(data: &[u8], dtype: safetensors::Dtype) -> Result<Vec<f32>> {
 
 fn f16_to_f32(bits: u16) -> f32 {
     let sign = ((bits >> 15) & 1) as u32;
-    let exp = ((bits >> 10) & 0x1f) as u32;
-    let mant = (bits & 0x3ff) as u32;
+    let exp  = ((bits >> 10) & 0x1f) as u32;
+    let mant =  (bits & 0x3ff) as u32;
     if exp == 0 {
         let v = mant as f32 / (1 << 24) as f32;
         return if sign == 0 { v } else { -v };
