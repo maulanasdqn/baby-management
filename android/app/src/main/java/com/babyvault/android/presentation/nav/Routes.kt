@@ -13,6 +13,8 @@ object Routes {
     const val HISTORY = "history"
     const val INSIGHTS = "insights"
     const val SETTINGS = "settings"
+    const val PROFILE = "profile"
+    const val SYNC_SETTINGS = "sync_settings"
     const val MEDIA = "media"
     const val CHAT = "chat"
     const val MODEL_SETUP = "model_setup"

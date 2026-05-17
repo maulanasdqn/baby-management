@@ -29,6 +29,8 @@ import com.babyvault.android.presentation.screens.log.LogFeedScreen
 import com.babyvault.android.presentation.screens.log.LogSleepScreen
 import com.babyvault.android.presentation.screens.media.MediaScreen
 import com.babyvault.android.presentation.screens.profile.ProfileSetupScreen
+import com.babyvault.android.presentation.screens.profile.ProfileScreen
+import com.babyvault.android.presentation.screens.settings.SettingsScreen
 import com.babyvault.android.presentation.screens.settings.SyncSettingsScreen
 import com.babyvault.android.presentation.screens.splash.SplashScreen
 import com.babyvault.android.presentation.screens.timeline.TimelineScreen
@@ -46,6 +48,8 @@ private val lightStatusBarRoutes = setOf(
     Routes.HISTORY,
     Routes.INSIGHTS,
     Routes.SETTINGS,
+    Routes.PROFILE,
+    Routes.SYNC_SETTINGS,
     Routes.MEDIA,
     Routes.LOG_FEED,
     Routes.LOG_SLEEP,
@@ -169,6 +173,16 @@ fun AppNavHost() {
                 popEnterTransition = { fadeIn(tween(200)) },
                 popExitTransition = { fadeOut(tween(200)) },
             ) {
+                SettingsScreen(
+                    onNavigateProfile = { navController.navigate(Routes.PROFILE) },
+                    onNavigateSync = { navController.navigate(Routes.SYNC_SETTINGS) },
+                    onNavigateModelSetup = { navController.navigate(Routes.MODEL_SETUP) },
+                )
+            }
+            composable(Routes.PROFILE) {
+                ProfileScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.SYNC_SETTINGS) {
                 SyncSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable(Routes.MEDIA) {
