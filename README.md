@@ -17,18 +17,19 @@ All sensitive data is encrypted at rest using ChaCha20-Poly1305 inside a Rust na
 │  BiometricPrompt → Android Keystore → Master Key   │
 │                                                     │
 │  Compose UI → ViewModel → UseCase → Repository     │
-└─────────────────────┬───────────────────────────────┘
-                      │  UniFFI (auto-generated Kotlin bindings)
-                      ▼
-┌─────────────────────────────────────────────────────┐
-│              Rust Core (.so / NDK)                  │
-│                                                     │
-│  VaultEngine (composition root)                     │
-│    ├── SQLite via rusqlite (local DB)               │
-│    ├── ChaCha20-Poly1305 (AEAD encryption)          │
-│    └── Use-cases (milestone / growth / media /      │
-│                   feed / sleep / diaper)            │
-└─────────────────────────────────────────────────────┘
+└──────────────────────┬──────────────────────────────┘
+                       │  UniFFI (auto-generated Kotlin bindings)
+           ┌───────────┴────────────┐
+           ▼                        ▼
+┌──────────────────┐   ┌────────────────────────────────┐
+│   Rust: vault    │   │    Rust: inference             │
+│                  │   │                                │
+│  VaultEngine     │   │  InferenceEngine               │
+│  ├── rusqlite    │   │  ├── NNAPI (API 31+)           │
+│  ├── ChaCha20    │   │  │   GPT-2 on Hexagon DSP /    │
+│  └── Use-cases   │   │  │   Adreno GPU                │
+│                  │   │  └── Burn NdArray (fallback)   │
+└──────────────────┘   └────────────────────────────────┘
 ```
 
 ### Key Security Flow
@@ -55,6 +56,7 @@ All sensitive data is encrypted at rest using ChaCha20-Poly1305 inside a Rust na
 | **Today Summary** | Home screen strip showing today's feed count, total sleep, and diaper changes |
 | **History** | Filterable activity log (Today / 7 days / 30 days) across all event types |
 | **Insights** | Weekly stats — avg sleep, feed breakdown (Breast/Bottle/Solid), diaper totals |
+| **Baby AI Chat** | On-device GPT-2 assistant; runs fully offline via NNAPI (Hexagon DSP / Adreno GPU) with CPU fallback |
 | **Self-hosted Sync** | Optional: periodic WorkManager sync pushing encrypted blobs to a self-hosted server |
 | **Biometric Auth** | Hardware-backed unlock; vault is inaccessible without the enrolled biometric |
 
@@ -66,7 +68,7 @@ The monorepo contains two sub-projects that mirror each other's clean architectu
 
 ```
 baby-management/
-├── core/          Rust NDK library (cdylib)
+├── core/          Rust NDK libraries (vault cdylib + inference cdylib)
 ├── android/       Kotlin + Jetpack Compose app
 └── README.md
 ```
@@ -77,41 +79,54 @@ Follows the same layer pattern as a backend service, with `presentation/` replac
 
 ```
 core/
-├── Cargo.toml              Workspace root (members: apps/config, apps/vault)
+├── Cargo.toml              Workspace root (resolver = "2")
 ├── rust-toolchain.toml     Pins stable + Android targets
-├── build.sh                One-shot: cargo ndk → copy .so → uniffi-bindgen → vault.kt
+├── build.sh                One-shot: cargo ndk → copy .so → uniffi-bindgen → *.kt
+├── crates/
+│   └── nnapi/              Raw Android Neural Networks API FFI + safe wrappers
+│       ├── src/sys.rs      Opaque types, op constants, extern "C" declarations
+│       └── src/lib.rs      NnapiModel / NnapiCompilation / NnapiExecution, GraphBuilder
 └── apps/
     ├── config/             RepositoryError, logger (shared across crates)
-    └── vault/              The cdylib + uniffi-bindgen binary
+    ├── vault/              The main cdylib — encryption, DB, all tracking use-cases
+    │   └── src/
+    │       ├── domain/               Pure types + repository/port TRAITS (no I/O)
+    │       │   ├── milestone/        entity  repository  errors
+    │       │   ├── growth/           entity  repository  errors
+    │       │   ├── media/            entity  repository  errors
+    │       │   ├── feed/             entity  repository  errors
+    │       │   ├── sleep/            entity  repository  errors
+    │       │   ├── diaper/           entity  repository  errors
+    │       │   └── vault/            ports (CryptoEngine)  errors
+    │       │
+    │       ├── application/          Business logic — use-cases generic over ports
+    │       │   ├── milestone/        create · list · detail · delete
+    │       │   ├── growth/           log · list_by_range
+    │       │   ├── media/            store_encrypted · read_decrypted · list_metadata
+    │       │   ├── feed/             log · list_by_range · delete
+    │       │   ├── sleep/            log · list_by_range · delete
+    │       │   ├── diaper/           log · list_by_range · delete
+    │       │   └── vault/            init_master_key · unlock
+    │       │
+    │       ├── infrastructure/       Concrete adapters
+    │       │   ├── repository/       Sqlite*Repository for all slices
+    │       │   │   └── migrations/   0001_init.sql · 0002_activities.sql
+    │       │   └── crypto/           ChaCha20Engine (impl CryptoEngine)
+    │       │
+    │       └── presentation/         FFI adapter — the only layer Kotlin touches
+    │           ├── engine.rs         VaultEngine (#[derive(uniffi::Object)])
+    │           ├── dto.rs            #[derive(uniffi::Record/Enum)]
+    │           ├── error.rs          #[derive(uniffi::Error)]
+    │           └── mappers.rs        domain entity ↔ FFI DTO
+    │
+    └── inference/          GPT-2 inference cdylib
         └── src/
-            ├── domain/               Pure types + repository/port TRAITS (no I/O)
-            │   ├── milestone/        entity  repository  errors
-            │   ├── growth/           entity  repository  errors
-            │   ├── media/            entity  repository  errors
-            │   ├── feed/             entity  repository  errors
-            │   ├── sleep/            entity  repository  errors
-            │   ├── diaper/           entity  repository  errors
-            │   └── vault/            ports (CryptoEngine)  errors
-            │
-            ├── application/          Business logic — use-cases generic over ports
-            │   ├── milestone/        create · list · detail · delete
-            │   ├── growth/           log · list_by_range
-            │   ├── media/            store_encrypted · read_decrypted · list_metadata
-            │   ├── feed/             log · list_by_range · delete
-            │   ├── sleep/            log · list_by_range · delete
-            │   ├── diaper/           log · list_by_range · delete
-            │   └── vault/            init_master_key · unlock
-            │
-            ├── infrastructure/       Concrete adapters (tech details live here only)
-            │   ├── repository/       Sqlite*Repository for all slices
-            │   │   └── migrations/   0001_init.sql · 0002_activities.sql
-            │   └── crypto/           ChaCha20Engine (impl CryptoEngine)
-            │
-            └── presentation/         FFI adapter — the only layer Kotlin touches
-                ├── engine.rs         VaultEngine (#[derive(uniffi::Object)]) — composition root
-                ├── dto.rs            #[derive(uniffi::Record/Enum)] — Kotlin-safe types
-                ├── error.rs          #[derive(uniffi::Error)]  — FfiError enum
-                └── mappers.rs        domain entity ↔ FFI DTO
+            ├── engine.rs       Burn NdArray CPU backend (API < 31 / emulator fallback)
+            ├── engine_nnapi.rs Full GPT-2 NNAPI DAG — attention, layer norm, GELU
+            ├── ffi.rs          UniFFI exports; tries NNAPI first, falls back to Burn
+            ├── loader.rs       SafeTensors weight loader + vocab/config JSON parsing
+            ├── model.rs        GPT-2 config struct
+            └── tokenizer.rs    BPE tokenizer
 ```
 
 **Key conventions:**
@@ -127,7 +142,7 @@ Single `:app` Gradle module. Layers are enforced by package, not by Gradle modul
 
 ```
 app/src/main/java/com/babyvault/android/
-├── core/native/          VaultEngineProvider — wraps the UniFFI VaultEngine @Singleton
+├── core/native/          VaultEngineProvider · InferenceEngineProvider (@Singleton)
 │
 ├── domain/               Pure Kotlin, zero Android/UniFFI imports
 │   ├── model/            Milestone  GrowthLog  MediaItem  FeedLog  SleepLog  DiaperLog
@@ -140,29 +155,31 @@ app/src/main/java/com/babyvault/android/
 │   └── local/            KeystoreMasterKeyStore · BabyProfileStore (DataStore)
 │
 ├── di/                   Hilt modules
-│   ├── EngineModule       @Provides VaultEngine (initializes db path + storage dir)
+│   ├── EngineModule       @Provides VaultEngine + InferenceEngine (singletons)
 │   ├── RepositoryModule   @Binds Engine* → domain interfaces
 │   └── DataStoreModule    @Provides DataStore<Preferences>
 │
 └── presentation/
     ├── theme/             Teal pastel color scheme, Material3, Material You (API 31+)
     ├── nav/               Routes + AppNavHost (Navigation-Compose, edge-to-edge)
-    ├── ui/                BottomNavBar (Home / History / Insights / Settings)
+    │                      Slide+fade transitions (280ms detail · 200ms bottom tabs)
+    ├── ui/                BottomNavBar (Home / History / Insights / Chat / Settings)
     └── screens/
         ├── splash/        Vault init check → routes to unlock / profile setup / home
         ├── unlock/        BiometricPrompt → unwrap key → VaultEngine.unlock()
         ├── profile/       Baby name + date-of-birth setup (first launch only)
         ├── home/          Teal gradient header, today's summary strip, quick-log cards
         ├── log/           LogFeedScreen · LogSleepScreen · LogDiaperScreen · FeedTimerScreen
-        ├── history/       Filterable activity log (Today / 7 days / 30 days)
+        ├── history/       Filterable activity log with Crossfade loading/empty/content states
         ├── insights/      Weekly stats — sleep avg, feed breakdown, diaper totals
         ├── timeline/      Milestone list
         ├── growth/        Growth log form and chart
         ├── media/         Encrypted photo/video vault
+        ├── chat/          Baby AI chat — animated bubbles, TypingDots, NNAPI-powered
         └── settings/      Sync server configuration
 ```
 
-**MVVM pattern:** ViewModels expose `StateFlow<State>` via `stateIn(viewModelScope, ...)`. One-shot navigation events use `Channel<Unit>` + `receiveAsFlow()` consumed via `LaunchedEffect(Unit) { collect { } }` to avoid re-triggering on recomposition.
+**MVVM pattern:** ViewModels expose `StateFlow<State>` via `stateIn(viewModelScope, ...)`. All `UiState` data classes are annotated `@Immutable` to prevent spurious Compose recomposition. One-shot navigation events use `Channel<Unit>` + `receiveAsFlow()`.
 
 ---
 
@@ -171,6 +188,7 @@ app/src/main/java/com/babyvault/android/
 | Layer | Technology | Why |
 |---|---|---|
 | UI | Kotlin + Jetpack Compose + Material3 | Declarative, type-safe, native performance |
+| Animations | `AnimatedContent`, `AnimatedVisibility`, `Crossfade`, slide+fade nav | Smooth state transitions without boilerplate |
 | Color system | Material You (`dynamicLightColorScheme` API 31+) with teal pastel fallback | Adapts to system wallpaper on modern devices |
 | DI | Hilt (KSP) | Compile-time verified, Android lifecycle-aware |
 | Navigation | Navigation-Compose | Type-safe routes, backstack handled |
@@ -181,7 +199,38 @@ app/src/main/java/com/babyvault/android/
 | Database | SQLite via `rusqlite` (bundled) | Local-first, no network, runs fully inside Rust |
 | Encryption | `chacha20poly1305` crate | Fast authenticated encryption, safe on mobile CPUs |
 | Key material | `zeroize` crate | Wipes key bytes from memory on drop |
+| On-device AI | Android NNAPI (API 31+) via raw Rust FFI | Runs GPT-2 on Hexagon DSP / Adreno GPU; zero model upload |
+| AI fallback | Burn NdArray backend | CPU inference on devices below API 31 or emulators |
 | Background sync | WorkManager + HiltWorker | 15-min periodic encrypted push to self-hosted server |
+| Release size | R8 minify + `shrinkResources` + ABI splits | Strips dead code/resources; arm64-v8a + armeabi-v7a only |
+
+---
+
+## On-Device AI
+
+The Baby AI chat screen runs a GPT-2 small (124M parameter) model entirely on-device via Android's Neural Networks API. No query or response ever leaves the device.
+
+### NNAPI Graph
+
+The static computation graph is compiled once at startup and routed by the Qualcomm driver to whichever accelerator is fastest:
+
+- **Hexagon DSP** — lowest power, best for text workloads
+- **Adreno GPU** — higher throughput for large batch sizes
+- **CPU fallback** — always available if accelerators are busy
+
+Key implementation details (`core/crates/nnapi/`, `core/apps/inference/`):
+
+| Challenge | Solution |
+|---|---|
+| No layer-norm op in NNAPI | Composed from 8 primitives: MEAN → SUB → MUL → MEAN → SQRT → DIV → MUL → ADD |
+| No GELU op in NNAPI | 9-op tanh approximation: x³ via MUL, tanh, 0.5·x·(1+tanh(...)) |
+| GPT-2 Conv1D weights are `[in, out]` | Transposed to `[out, in]` at model load time for FULLY_CONNECTED |
+| Attention QK^T | `BATCH_MATMUL` (op 102, API 31+) |
+| Pre-API-31 devices / emulators | Auto-detects at startup, falls back to Burn NdArray CPU backend |
+
+### Model Setup
+
+Place a GPT-2 SafeTensors checkpoint and tokenizer in the app's files directory, then configure the path via the Model Setup screen. The model is never bundled in the APK.
 
 ---
 
@@ -192,20 +241,28 @@ baby-management/
 ├── core/
 │   ├── Cargo.toml              Workspace root (resolver = "2")
 │   ├── rust-toolchain.toml     Pins stable + Android targets
-│   ├── build.sh                One-shot: cargo ndk → copy .so → uniffi-bindgen → vault.kt
+│   ├── build.sh                One-shot: cargo ndk → copy .so → uniffi-bindgen → *.kt
+│   ├── crates/
+│   │   └── nnapi/              Raw NNAPI FFI + safe GraphBuilder
 │   └── apps/
-│       ├── config/             RepositoryError, logger (shared across crates)
-│       └── vault/              The cdylib + uniffi-bindgen binary
+│       ├── config/             RepositoryError, logger
+│       ├── vault/              Encryption + DB cdylib
+│       └── inference/          GPT-2 inference cdylib (NNAPI + Burn)
 │
 ├── android/
 │   ├── settings.gradle.kts
 │   ├── build.gradle.kts
 │   ├── gradle/libs.versions.toml
-│   ├── libs/vault/
-│   │   ├── jniLibs/            ← populated by build.sh (.so files, 4 ABIs)
-│   │   └── kotlin/             ← populated by build.sh (vault.kt bindings)
+│   ├── libs/
+│   │   ├── vault/
+│   │   │   ├── jniLibs/        ← populated by build.sh (libvault.so, 4 ABIs)
+│   │   │   └── kotlin/         ← populated by build.sh (vault.kt bindings)
+│   │   └── inference/
+│   │       ├── jniLibs/        ← populated by build.sh (libinference.so, 4 ABIs)
+│   │       └── kotlin/         ← populated by build.sh (inference.kt bindings)
 │   └── app/
-│       ├── build.gradle.kts    sourceSets wired to libs/vault/
+│       ├── build.gradle.kts    sourceSets wired to libs/; R8 minify; ABI splits
+│       ├── proguard-rules.pro  Keep rules for JNA, UniFFI, coroutines, Hilt
 │       └── src/main/
 │           ├── AndroidManifest.xml
 │           └── java/com/babyvault/android/
@@ -253,7 +310,7 @@ cd core
 bash build.sh
 ```
 
-This compiles `libvault.so` for all four ABIs and runs `uniffi-bindgen` to generate `android/libs/vault/kotlin/com/babyvault/core/vault.kt`.
+This compiles `libvault.so` and `libinference.so` for all four ABIs and runs `uniffi-bindgen` to generate the Kotlin bindings.
 
 ### 4. Build and install the Android app
 
@@ -336,8 +393,9 @@ Tests in `application/*/use_cases/` use in-memory fake repositories — no Andro
 | Phase 1 — Plumbing | Done | Rust workspace, UniFFI bridge, Android project, build pipeline |
 | Phase 2 — Security & DB | Done | ChaCha20 crypto, rusqlite schema + migrations, BiometricPrompt key lifecycle |
 | Phase 3 — Core Tracking | Done | Feed / Sleep / Diaper logs, Feed timer, Milestone vault, Growth log, Media vault |
-| Phase 4 — UI & UX | Done | Baby profile setup, Today summary, History, Insights, teal pastel theme, pastel filled icons, edge-to-edge system bar blending |
-| Phase 5 — Self-hosted Sync | Done | Rust `ureq` push engine, SQLite sync_state tracking, WorkManager 15-min periodic sync, Sync Settings screen |
+| Phase 4 — UI & UX | Done | Baby profile setup, Today summary, History, Insights, teal pastel theme, edge-to-edge |
+| Phase 5 — Self-hosted Sync | Done | Rust `ureq` push engine, SQLite sync_state tracking, WorkManager 15-min periodic sync |
+| Phase 6 — On-device AI | Done | NNAPI Rust bindings, GPT-2 inference engine, Baby AI chat with animated UI |
 
 ---
 
@@ -349,3 +407,4 @@ Tests in `application/*/use_cases/` use in-memory fake repositories — no Andro
 - `rusqlite` is compiled with the `bundled` feature — SQLite is statically linked into the `.so`, avoiding system SQLite version quirks.
 - This app requests no internet permission by default. There is no analytics, no telemetry, no third-party SDK.
 - The self-hosted sync feature pushes only encrypted blobs — the server never receives plaintext data or the encryption key.
+- The AI model runs entirely on-device — no prompt, no response, and no conversation history ever leaves the device.
