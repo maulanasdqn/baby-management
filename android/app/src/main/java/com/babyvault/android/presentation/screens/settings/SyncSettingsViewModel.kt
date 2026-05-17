@@ -23,7 +23,7 @@ data class SyncSettingsUiState(
 )
 @HiltViewModel
 class SyncSettingsViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val configureSyncServer: ConfigureSyncServerUseCase,
     private val syncNow: SyncNowUseCase,
     private val getStatus: GetSyncStatusUseCase,

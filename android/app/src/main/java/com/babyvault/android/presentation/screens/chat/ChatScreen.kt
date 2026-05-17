@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
@@ -155,7 +155,7 @@ private fun ChatInputBar(
                     modifier = Modifier.size(48.dp),
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = Teal500),
                 ) {
-                    Icon(Icons.Default.Send, contentDescription = "Send", tint = Color.White, modifier = Modifier.size(20.dp))
+                    Icon(Icons.AutoMirrored.Default.Send, contentDescription = "Send", tint = Color.White, modifier = Modifier.size(20.dp))
                 }
             }
         }

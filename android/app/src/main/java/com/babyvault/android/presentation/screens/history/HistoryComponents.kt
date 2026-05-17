@@ -3,6 +3,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,7 +20,7 @@ internal fun itemDecorFor(id: String): ItemDecor = when {
     id.startsWith("sleep_")     -> ItemDecor(Icons.Filled.Bedtime,    SkyBlue100,  SkyBlue400)
     id.startsWith("diaper_")    -> ItemDecor(Icons.Filled.ChildCare,  Sage100,     Sage400)
     id.startsWith("milestone_") -> ItemDecor(Icons.Filled.Star,       Teal100,     Teal500)
-    id.startsWith("growth_")    -> ItemDecor(Icons.Filled.ShowChart,  Lavender100, Lavender400)
+    id.startsWith("growth_")    -> ItemDecor(Icons.AutoMirrored.Filled.ShowChart,  Lavender100, Lavender400)
     else                        -> ItemDecor(Icons.Filled.Circle,     Color(0xFFE8E8E8), Color(0xFFAAAAAA))
 }
 @Composable

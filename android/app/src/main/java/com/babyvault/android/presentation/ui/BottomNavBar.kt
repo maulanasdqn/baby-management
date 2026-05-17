@@ -2,7 +2,7 @@ package com.babyvault.android.presentation.ui
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.ChildFriendly
-import androidx.compose.material.icons.filled.EventNote
+import androidx.compose.material.icons.automirrored.filled.EventNote
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
@@ -42,7 +42,7 @@ fun BottomNavBar(currentRoute: String, onNavigate: (String) -> Unit) {
         NavigationBarItem(
             selected = currentRoute == BottomTab.History.route,
             onClick = { onNavigate(BottomTab.History.route) },
-            icon = { Icon(Icons.Filled.EventNote, null) },
+            icon = { Icon(Icons.AutoMirrored.Filled.EventNote, null) },
             label = { Text("History") },
             colors = navItemColors,
         )

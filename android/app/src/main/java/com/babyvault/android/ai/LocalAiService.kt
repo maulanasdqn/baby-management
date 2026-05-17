@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class LocalAiService @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     private var engine: NativeInferenceEngine? = null
 
