@@ -1,5 +1,4 @@
 package com.babyvault.android.ai
-
 import android.content.Context
 import com.google.ai.edge.aicore.GenerativeModel
 import com.google.ai.edge.aicore.generationConfig
@@ -8,13 +7,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
-
 @Singleton
 class LocalAiService @Inject constructor(@ApplicationContext private val context: Context) {
-
     private var model: GenerativeModel? = null
     private var aiCoreAvailable = false
-
     companion object {
         private const val SYSTEM_PROMPT = """You are Baby AI, a friendly baby-care assistant built into a baby tracking app.
 You ONLY answer questions about: feeding, breastfeeding, formula, baby sleep, diapers, growth, developmental milestones, teething, baby health, bathing, tummy time, and newborn care.
@@ -22,7 +18,6 @@ If the user asks about anything unrelated to baby care (programming, politics, s
 Keep answers concise, warm, and evidence-based. Always recommend consulting a pediatrician for medical concerns.
 """
     }
-
     suspend fun initialize(): AiCoreStatus {
         return try {
             val cfg = generationConfig {
@@ -39,16 +34,13 @@ Keep answers concise, warm, and evidence-based. Always recommend consulting a pe
             AiCoreStatus.Unavailable(e.message ?: "AICore not supported on this device")
         }
     }
-
     fun isReady(): Boolean = aiCoreAvailable && model != null
-
     fun generate(userMessage: String): Flow<String> = flow {
         val m = model
         if (!aiCoreAvailable || m == null) {
             stubReply(userMessage).forEach { emit(it) }
             return@flow
         }
-
         val prompt = buildPrompt(userMessage)
         try {
             m.generateContentStream(prompt).collect { chunk ->
@@ -58,10 +50,8 @@ Keep answers concise, warm, and evidence-based. Always recommend consulting a pe
             emit("Sorry, something went wrong. Please try again.")
         }
     }
-
     private fun buildPrompt(userMessage: String): String =
         "$SYSTEM_PROMPT\nUser: $userMessage\nAssistant:"
-
     private fun stubReply(userMessage: String): List<String> {
         val q = userMessage.lowercase()
         val reply = when {
@@ -84,9 +74,7 @@ Keep answers concise, warm, and evidence-based. Always recommend consulting a pe
         }
         return reply.split(" ").map { "$it " }
     }
-
     private fun anyOf(text: String, vararg keywords: String) = keywords.any { it in text }
-
     private fun isOffTopic(q: String): Boolean {
         val offTopicPatterns = listOf(
             "rust", "kotlin", "java", "python", "code", "programming", "software",
@@ -102,7 +90,6 @@ Keep answers concise, warm, and evidence-based. Always recommend consulting a pe
         return offTopicPatterns.any { it in q } && babyWords.none { it in q }
     }
 }
-
 sealed class AiCoreStatus {
     object Available : AiCoreStatus()
     data class Unavailable(val reason: String) : AiCoreStatus()

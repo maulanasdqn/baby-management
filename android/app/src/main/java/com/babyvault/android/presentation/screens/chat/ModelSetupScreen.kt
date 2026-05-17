@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.chat
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,7 +14,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelSetupScreen(
@@ -23,10 +21,8 @@ fun ModelSetupScreen(
     viewModel: ModelSetupViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-
     LaunchedEffect(Unit) { viewModel.initialize() }
     LaunchedEffect(state.isReady) { if (state.isReady) onBack() }
-
     Scaffold(
         containerColor = NeutralGray,
         topBar = {
@@ -60,7 +56,6 @@ fun ModelSetupScreen(
                     Icon(Icons.Default.SmartToy, null, tint = Teal600, modifier = Modifier.size(40.dp))
                 }
             }
-
             Text(
                 "Gemini Nano",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
@@ -72,7 +67,6 @@ fun ModelSetupScreen(
                 color = TextSecondary,
                 textAlign = TextAlign.Center,
             )
-
             when {
                 state.isChecking -> {
                     Column(

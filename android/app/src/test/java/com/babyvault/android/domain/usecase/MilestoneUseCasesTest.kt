@@ -1,5 +1,4 @@
 package com.babyvault.android.domain.usecase
-
 import com.babyvault.android.domain.model.Milestone
 import com.babyvault.android.domain.repo.MilestoneRepository
 import kotlinx.coroutines.test.runTest
@@ -7,11 +6,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
-
 class MilestoneUseCasesTest {
-
     private val now = Instant.now()
-
     private fun milestone(id: String, title: String) = Milestone(
         id = id,
         title = title,
@@ -19,8 +15,6 @@ class MilestoneUseCasesTest {
         occurredAt = now.minusSeconds(86_400),
         createdAt = now,
     )
-
-    // Fake repository backed by a mutable list
     private inner class FakeRepo(
         private val items: MutableList<Milestone> = mutableListOf(),
     ) : MilestoneRepository {
@@ -39,9 +33,6 @@ class MilestoneUseCasesTest {
             return Result.success(Unit)
         }
     }
-
-    // --- CreateMilestoneUseCase ---
-
     @Test
     fun `create delegates to repo and returns milestone`() = runTest {
         val repo = FakeRepo()
@@ -49,7 +40,6 @@ class MilestoneUseCasesTest {
         assertTrue(result.isSuccess)
         assertEquals("First Steps", result.getOrThrow().title)
     }
-
     @Test
     fun `create adds item to repo`() = runTest {
         val repo = FakeRepo()
@@ -58,15 +48,11 @@ class MilestoneUseCasesTest {
         assertEquals(1, listed.size)
         assertEquals("Smile", listed[0].title)
     }
-
-    // --- ListMilestonesUseCase ---
-
     @Test
     fun `list returns empty when repo is empty`() = runTest {
         val result = ListMilestonesUseCase(FakeRepo())()
         assertTrue(result.getOrThrow().isEmpty())
     }
-
     @Test
     fun `list respects limit`() = runTest {
         val repo = FakeRepo(mutableListOf(
@@ -75,7 +61,6 @@ class MilestoneUseCasesTest {
         val result = ListMilestonesUseCase(repo)(limit = 2)
         assertEquals(2, result.getOrThrow().size)
     }
-
     @Test
     fun `list uses default limit of 20`() = runTest {
         val items = (1..25).map { milestone("$it", "M$it") }.toMutableList()
@@ -83,9 +68,6 @@ class MilestoneUseCasesTest {
         val result = ListMilestonesUseCase(repo)()
         assertEquals(20, result.getOrThrow().size)
     }
-
-    // --- DeleteMilestoneUseCase ---
-
     @Test
     fun `delete removes milestone from repo`() = runTest {
         val repo = FakeRepo(mutableListOf(milestone("abc", "Crawling")))
@@ -93,7 +75,6 @@ class MilestoneUseCasesTest {
         val listed = ListMilestonesUseCase(repo)().getOrThrow()
         assertTrue(listed.isEmpty())
     }
-
     @Test
     fun `delete returns success`() = runTest {
         val repo = FakeRepo(mutableListOf(milestone("xyz", "Bath")))
