@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use anyhow::{Context, Result};
-use regex::Regex;
+use fancy_regex::Regex;
 
 pub struct Tokenizer {
     vocab: HashMap<String, u32>,
@@ -59,7 +59,7 @@ impl Tokenizer {
 
     pub fn encode(&self, text: &str) -> Vec<u32> {
         let mut token_ids = Vec::new();
-        for piece in self.pattern.find_iter(text) {
+        for piece in self.pattern.find_iter(text).flatten() {
             let word = piece.as_str();
             let byte_word: String = word
                 .bytes()
