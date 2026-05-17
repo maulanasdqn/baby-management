@@ -1,4 +1,5 @@
 package com.babyvault.android.presentation.screens.history
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babyvault.android.domain.usecase.ListDiaperByRangeUseCase
@@ -15,6 +16,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 data class HistoryItem(val id: String, val label: String, val subtitle: String, val timeLabel: String)
+@Immutable
 data class HistoryState(val items: List<HistoryItem> = emptyList(), val isLoading: Boolean = false)
 @HiltViewModel
 class HistoryViewModel @Inject constructor(

@@ -1,4 +1,6 @@
 package com.babyvault.android.presentation.screens.history
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,16 +24,26 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
     Column(modifier = Modifier.fillMaxSize()) {
         HistoryHeader(rangeDays = rangeDays, onRangeChange = { rangeDays = it })
         HorizontalDivider()
-        when {
-            state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Teal500)
-            }
-            state.items.isEmpty() -> EmptyState()
-            else -> LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                items(state.items, key = { it.id }) { HistoryItemCard(it) }
+        Crossfade(
+            targetState = when {
+                state.isLoading -> "loading"
+                state.items.isEmpty() -> "empty"
+                else -> "content"
+            },
+            animationSpec = tween(250),
+            label = "history_state",
+        ) { screen ->
+            when (screen) {
+                "loading" -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Teal500)
+                }
+                "empty" -> EmptyState()
+                else -> LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(state.items, key = { it.id }) { HistoryItemCard(it) }
+                }
             }
         }
     }

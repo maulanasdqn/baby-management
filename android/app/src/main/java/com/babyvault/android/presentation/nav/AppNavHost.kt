@@ -1,5 +1,10 @@
 package com.babyvault.android.presentation.nav
 import android.app.Activity
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
@@ -83,6 +88,10 @@ fun AppNavHost() {
             navController = navController,
             startDestination = Routes.SPLASH,
             modifier = Modifier.padding(padding).consumeWindowInsets(padding),
+            enterTransition = { slideInHorizontally(tween(280)) { it / 4 } + fadeIn(tween(280)) },
+            exitTransition = { slideOutHorizontally(tween(280)) { -it / 4 } + fadeOut(tween(180)) },
+            popEnterTransition = { slideInHorizontally(tween(280)) { -it / 4 } + fadeIn(tween(280)) },
+            popExitTransition = { slideOutHorizontally(tween(280)) { it / 4 } + fadeOut(tween(180)) },
         ) {
             composable(Routes.SPLASH) {
                 SplashScreen(
@@ -126,16 +135,40 @@ fun AppNavHost() {
                     },
                 )
             }
-            composable(Routes.HOME) {
+            composable(
+                Routes.HOME,
+                enterTransition = { fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(200)) },
+                popEnterTransition = { fadeIn(tween(200)) },
+                popExitTransition = { fadeOut(tween(200)) },
+            ) {
                 HomeScreen(onNavigate = { route -> navController.navigate(route) })
             }
-            composable(Routes.HISTORY) {
+            composable(
+                Routes.HISTORY,
+                enterTransition = { fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(200)) },
+                popEnterTransition = { fadeIn(tween(200)) },
+                popExitTransition = { fadeOut(tween(200)) },
+            ) {
                 HistoryScreen()
             }
-            composable(Routes.INSIGHTS) {
+            composable(
+                Routes.INSIGHTS,
+                enterTransition = { fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(200)) },
+                popEnterTransition = { fadeIn(tween(200)) },
+                popExitTransition = { fadeOut(tween(200)) },
+            ) {
                 InsightsScreen()
             }
-            composable(Routes.SETTINGS) {
+            composable(
+                Routes.SETTINGS,
+                enterTransition = { fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(200)) },
+                popEnterTransition = { fadeIn(tween(200)) },
+                popExitTransition = { fadeOut(tween(200)) },
+            ) {
                 SyncSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable(Routes.MEDIA) {
@@ -159,7 +192,13 @@ fun AppNavHost() {
             composable(Routes.LOG_GROWTH) {
                 GrowthScreen()
             }
-            composable(Routes.CHAT) {
+            composable(
+                Routes.CHAT,
+                enterTransition = { fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(200)) },
+                popEnterTransition = { fadeIn(tween(200)) },
+                popExitTransition = { fadeOut(tween(200)) },
+            ) {
                 ChatScreen(onSetupModel = { navController.navigate(Routes.MODEL_SETUP) })
             }
             composable(Routes.MODEL_SETUP) {

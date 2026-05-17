@@ -1,5 +1,18 @@
 package com.babyvault.android.presentation.screens.chat
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,22 +59,43 @@ fun ChatScreen(
         ChatHeader()
         HorizontalDivider(color = NeutralGray)
 
-        if (state.messages.isEmpty()) {
-            EmptyChat(modifier = Modifier.weight(1f))
+        AnimatedContent(
+            targetState = state.messages.isEmpty(),
+            modifier = Modifier.weight(1f),
+            transitionSpec = { fadeIn(tween(200)) togetherWith fadeOut(tween(200)) },
+            label = "chat_content",
+        ) { isEmpty ->
+        if (isEmpty) {
+            EmptyChat(modifier = Modifier.fillMaxSize())
         } else {
             LazyColumn(
                 state = listState,
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
+                    .fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(state.messages, key = { it.id }) { msg ->
-                    ChatBubble(message = msg)
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
+                    ) {
+                        ChatBubble(message = msg)
+                    }
+                }
+                if (state.isGenerating) {
+                    item(key = "typing") {
+                        Row(
+                            modifier = Modifier.padding(start = 52.dp, top = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            TypingDots()
+                        }
+                    }
                 }
             }
         }
+        } // AnimatedContent
 
         ChatInputBar(
             isGenerating = state.isGenerating,
@@ -158,6 +193,29 @@ private fun ChatInputBar(
                     Icon(Icons.AutoMirrored.Default.Send, contentDescription = "Send", tint = Color.White, modifier = Modifier.size(20.dp))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TypingDots() {
+    val transition = rememberInfiniteTransition(label = "typing")
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        repeat(3) { i ->
+            val alpha by transition.animateFloat(
+                initialValue = 0.2f, targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    tween(600, delayMillis = i * 150, easing = LinearEasing),
+                    RepeatMode.Reverse,
+                ),
+                label = "dot_$i",
+            )
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(Teal500.copy(alpha = alpha)),
+            )
         }
     }
 }

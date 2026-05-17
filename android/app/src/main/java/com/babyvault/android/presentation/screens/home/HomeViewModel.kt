@@ -8,6 +8,7 @@ import com.babyvault.android.domain.usecase.ListDiaperByRangeUseCase
 import com.babyvault.android.domain.usecase.ListFeedByRangeUseCase
 import com.babyvault.android.domain.usecase.ListMilestonesUseCase
 import com.babyvault.android.domain.usecase.ListSleepByRangeUseCase
+import androidx.compose.runtime.Immutable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+@Immutable
 data class HomeUiState(
     val engineVersion: String = "",
     val milestones: List<Milestone> = emptyList(),

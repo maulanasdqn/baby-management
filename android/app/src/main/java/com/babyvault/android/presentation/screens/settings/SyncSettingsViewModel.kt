@@ -1,5 +1,6 @@
 package com.babyvault.android.presentation.screens.settings
 import android.content.Context
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babyvault.android.domain.model.SyncStatus
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+@Immutable
 data class SyncSettingsUiState(
     val status: SyncStatus? = null,
     val isLoading: Boolean = true,

@@ -20,7 +20,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -43,6 +44,15 @@ android {
                 "../libs/vault/jniLibs",
                 "../libs/inference/jniLibs",
             ))
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = buildTypes.getByName("release").isMinifyEnabled
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
+            isUniversalApk = false
         }
     }
 }
