@@ -39,7 +39,8 @@ fun ChatScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(NeutralGray),
+            .background(NeutralGray)
+            .imePadding(),
     ) {
         ChatHeader()
         HorizontalDivider(color = NeutralGray)
@@ -111,7 +112,6 @@ private fun ChatInputBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
