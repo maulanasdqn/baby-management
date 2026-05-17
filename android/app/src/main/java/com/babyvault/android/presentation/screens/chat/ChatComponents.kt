@@ -1,96 +1,138 @@
 package com.babyvault.android.presentation.screens.chat
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.babyvault.android.presentation.theme.*
+
 @Composable
 internal fun ChatBubble(message: ChatMessage) {
     val isUser = message.sender == Sender.User
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
+        verticalAlignment = Alignment.Bottom,
     ) {
+        if (!isUser) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Teal100),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Default.SmartToy, null, tint = Teal600, modifier = Modifier.size(18.dp))
+            }
+            Spacer(Modifier.width(8.dp))
+        }
+
         Box(
             modifier = Modifier
-                .widthIn(max = 280.dp)
+                .widthIn(min = 48.dp, max = 260.dp)
+                .shadow(
+                    elevation = if (isUser) 2.dp else 1.dp,
+                    shape = RoundedCornerShape(
+                        topStart = 18.dp,
+                        topEnd = 18.dp,
+                        bottomStart = if (isUser) 18.dp else 4.dp,
+                        bottomEnd = if (isUser) 4.dp else 18.dp,
+                    ),
+                    ambientColor = if (isUser) Teal500.copy(alpha = 0.2f) else Color.Black.copy(alpha = 0.06f),
+                )
                 .clip(
                     RoundedCornerShape(
-                        topStart = 16.dp,
-                        topEnd = 16.dp,
-                        bottomStart = if (isUser) 16.dp else 4.dp,
-                        bottomEnd = if (isUser) 4.dp else 16.dp,
+                        topStart = 18.dp,
+                        topEnd = 18.dp,
+                        bottomStart = if (isUser) 18.dp else 4.dp,
+                        bottomEnd = if (isUser) 4.dp else 18.dp,
                     )
                 )
                 .background(if (isUser) Teal500 else CardSurface)
                 .padding(horizontal = 14.dp, vertical = 10.dp),
         ) {
             if (message.isStreaming && message.text.isEmpty()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
-                    color = Teal500,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 4.dp),
+                ) {
+                    repeat(3) {
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .clip(CircleShape)
+                                .background(TextSecondary.copy(alpha = 0.5f))
+                        )
+                    }
+                }
             } else {
                 Text(
                     text = message.text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (isUser) androidx.compose.ui.graphics.Color.White else TextPrimary,
+                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                    color = if (isUser) Color.White else TextPrimary,
                 )
+            }
+        }
+
+        if (isUser) {
+            Spacer(Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Teal100),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("U", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Teal600)
             }
         }
     }
 }
-@Composable
-internal fun TypingIndicator() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
-    ) {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp))
-                .background(CardSurface)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            repeat(3) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(TextSecondary),
-                )
-            }
-        }
-    }
-}
+
 @Composable
 internal fun ChatHeader() {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(CardSurface)
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 20.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            "Baby AI",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            color = TextPrimary,
-        )
-        Text(
-            "Ask anything about your baby",
-            style = MaterialTheme.typography.bodySmall,
-            color = TextSecondary,
-        )
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(Teal100),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Default.SmartToy, null, tint = Teal600, modifier = Modifier.size(22.dp))
+        }
+        Column {
+            Text(
+                "Baby AI",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = TextPrimary,
+            )
+            Text(
+                "On-device assistant",
+                style = MaterialTheme.typography.labelSmall,
+                color = TextSecondary,
+            )
+        }
     }
 }
