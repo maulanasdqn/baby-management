@@ -4,11 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,21 +19,17 @@ import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.babyvault.android.presentation.theme.CardWhite
 import com.babyvault.android.presentation.theme.Lavender100
 import com.babyvault.android.presentation.theme.NavyPrimary
 import com.babyvault.android.presentation.theme.TextSecondary
-import com.babyvault.android.presentation.theme.WarmCream
 
 sealed class BottomTab(val route: String, val label: String) {
     object Home     : BottomTab("home",     "Home")
@@ -101,33 +94,19 @@ private fun FloatingNavItem(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(if (selected) Lavender100 else Color.Transparent)
+            .clickable(onClick = onClick),
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(if (selected) Lavender100 else Color.Transparent),
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = if (selected) NavyPrimary else TextSecondary,
-                modifier = Modifier.size(22.dp),
-            )
-        }
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) NavyPrimary else TextSecondary,
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = if (selected) NavyPrimary else TextSecondary,
+            modifier = Modifier.size(22.dp),
         )
     }
 }
