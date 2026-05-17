@@ -4,28 +4,23 @@ use crate::domain::growth::repository::GrowthRepository;
 use chrono::{DateTime, Utc};
 use tracing::info;
 use uuid::Uuid;
-
 pub struct LogGrowthCommand {
     pub weight_grams: Option<u32>,
     pub height_mm: Option<u32>,
     pub notes: String,
     pub logged_at: DateTime<Utc>,
 }
-
 pub struct LogGrowthUseCase<R> {
     repository: R,
 }
-
 impl<R: GrowthRepository> LogGrowthUseCase<R> {
     pub fn new(repository: R) -> Self {
         Self { repository }
     }
-
     pub fn execute(&self, cmd: LogGrowthCommand) -> Result<GrowthLog, GrowthError> {
         if cmd.weight_grams.is_none() && cmd.height_mm.is_none() {
             return Err(GrowthError::NoMeasurementProvided);
         }
-
         let id = Uuid::new_v4();
         let log = self
             .repository
@@ -37,12 +32,10 @@ impl<R: GrowthRepository> LogGrowthUseCase<R> {
                 logged_at: cmd.logged_at,
             })
             .map_err(GrowthError::from)?;
-
         info!(growth_id = %log.id, "growth log created");
         Ok(log)
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -52,9 +45,7 @@ mod tests {
     use config::error_db::RepositoryError;
     use std::sync::Mutex;
     use uuid::Uuid;
-
     struct FakeRepo(Mutex<Vec<GrowthLog>>);
-
     impl GrowthRepository for FakeRepo {
         fn find_by_id(&self, id: Uuid) -> Result<Option<GrowthLog>, RepositoryError> {
             Ok(self.0.lock().unwrap().iter().find(|g| g.id == id).map(|g| GrowthLog {
@@ -75,7 +66,6 @@ mod tests {
             Ok(())
         }
     }
-
     #[test]
     fn log_with_weight_only_succeeds() {
         let repo = FakeRepo(Mutex::new(vec![]));
@@ -89,7 +79,6 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(result.unwrap().weight_grams, Some(3500));
     }
-
     #[test]
     fn log_with_height_only_succeeds() {
         let repo = FakeRepo(Mutex::new(vec![]));
@@ -103,7 +92,6 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(result.unwrap().height_mm, Some(510));
     }
-
     #[test]
     fn log_with_no_measurements_is_rejected() {
         let repo = FakeRepo(Mutex::new(vec![]));
@@ -116,7 +104,6 @@ mod tests {
         });
         assert!(matches!(result, Err(GrowthError::NoMeasurementProvided)));
     }
-
     #[test]
     fn log_with_both_measurements_succeeds() {
         let repo = FakeRepo(Mutex::new(vec![]));

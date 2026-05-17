@@ -55,12 +55,10 @@ use chrono::{TimeZone, Utc};
 use std::sync::Mutex;
 use uuid::Uuid;
 use zeroize::Zeroizing;
-
 struct SyncConfig {
     server_url: String,
     api_key: String,
 }
-
 #[derive(uniffi::Object)]
 pub struct VaultEngine {
     master_key: Mutex<Option<Zeroizing<Vec<u8>>>>,
@@ -75,14 +73,12 @@ pub struct VaultEngine {
     storage_dir: String,
     sync_config: Mutex<Option<SyncConfig>>,
 }
-
 #[uniffi::export]
 impl VaultEngine {
     #[uniffi::constructor]
     pub fn new(db_path: String, storage_dir: String) -> Result<Self, FfiError> {
         let pool = sqlite_pool::open(&db_path)
             .map_err(|e| FfiError::Internal { msg: e.to_string() })?;
-
         Ok(Self {
             master_key: Mutex::new(None),
             milestone_repo: SqliteMilestoneRepository::new(pool.clone()),
@@ -97,15 +93,12 @@ impl VaultEngine {
             sync_config: Mutex::new(None),
         })
     }
-
     pub fn engine_version(&self) -> String {
         format!("vault {}", env!("CARGO_PKG_VERSION"))
     }
-
     pub fn generate_master_key(&self) -> Result<Vec<u8>, FfiError> {
         InitMasterKeyUseCase::execute().map_err(FfiError::from)
     }
-
     pub fn unlock(&self, raw_key: Vec<u8>) -> Result<(), FfiError> {
         let key = UnlockUseCase::execute(UnlockCommand { raw_key }).map_err(FfiError::from)?;
         let mut guard = self
@@ -115,9 +108,6 @@ impl VaultEngine {
         *guard = Some(key);
         Ok(())
     }
-
-    // --- Milestones ---
-
     pub fn create_milestone(
         &self,
         title: String,
@@ -128,14 +118,12 @@ impl VaultEngine {
             .timestamp_millis_opt(occurred_at_millis)
             .single()
             .ok_or_else(|| FfiError::Validation { msg: "invalid occurred_at".into() })?;
-
         let uc = CreateMilestoneUseCase::new(&self.milestone_repo);
         let m = uc
             .execute(CreateMilestoneCommand { title, description, occurred_at })
             .map_err(FfiError::from)?;
         Ok(mappers::milestone_to_dto(m))
     }
-
     pub fn list_milestones(
         &self,
         limit: u32,
@@ -147,23 +135,18 @@ impl VaultEngine {
             .map_err(FfiError::from)?;
         Ok(items.into_iter().map(mappers::milestone_to_dto).collect())
     }
-
     pub fn get_milestone(&self, id: String) -> Result<MilestoneDto, FfiError> {
         let uuid = Uuid::parse_str(&id)
             .map_err(|_| FfiError::Validation { msg: "invalid id".into() })?;
         let uc = DetailMilestoneUseCase::new(&self.milestone_repo);
         uc.execute(uuid).map(mappers::milestone_to_dto).map_err(FfiError::from)
     }
-
     pub fn delete_milestone(&self, id: String) -> Result<(), FfiError> {
         let uuid = Uuid::parse_str(&id)
             .map_err(|_| FfiError::Validation { msg: "invalid id".into() })?;
         let uc = DeleteMilestoneUseCase::new(&self.milestone_repo);
         uc.execute(uuid).map_err(FfiError::from)
     }
-
-    // --- Growth ---
-
     pub fn log_growth(
         &self,
         weight_grams: Option<u32>,
@@ -175,14 +158,12 @@ impl VaultEngine {
             .timestamp_millis_opt(logged_at_millis)
             .single()
             .ok_or_else(|| FfiError::Validation { msg: "invalid logged_at".into() })?;
-
         let uc = LogGrowthUseCase::new(&self.growth_repo);
         let g = uc
             .execute(LogGrowthCommand { weight_grams, height_mm, notes, logged_at })
             .map_err(FfiError::from)?;
         Ok(mappers::growth_log_to_dto(g))
     }
-
     pub fn list_growth_by_range(
         &self,
         from_millis: i64,
@@ -196,16 +177,12 @@ impl VaultEngine {
             .timestamp_millis_opt(to_millis)
             .single()
             .ok_or_else(|| FfiError::Validation { msg: "invalid to".into() })?;
-
         let uc = ListGrowthByRangeUseCase::new(&self.growth_repo);
         let items = uc
             .execute(ListGrowthByRangeCommand { from, to })
             .map_err(FfiError::from)?;
         Ok(items.into_iter().map(mappers::growth_log_to_dto).collect())
     }
-
-    // --- Media ---
-
     pub fn store_media(
         &self,
         title: String,
@@ -223,7 +200,6 @@ impl VaultEngine {
             .map_err(FfiError::from)?;
         Ok(mappers::media_item_to_dto(item))
     }
-
     pub fn read_media(&self, id: String) -> Result<Vec<u8>, FfiError> {
         let key = self.key()?;
         let uuid = Uuid::parse_str(&id)
@@ -231,7 +207,6 @@ impl VaultEngine {
         let uc = ReadDecryptedMediaUseCase::new(&self.media_repo, &self.crypto);
         uc.execute(uuid, &key).map_err(FfiError::from)
     }
-
     pub fn list_media(
         &self,
         limit: u32,
@@ -241,9 +216,6 @@ impl VaultEngine {
         let items = uc.execute(limit, offset).map_err(FfiError::from)?;
         Ok(items.into_iter().map(mappers::media_item_to_dto).collect())
     }
-
-    // --- Feed ---
-
     pub fn log_feed(
         &self,
         feed_type: FeedTypeDto,
@@ -268,7 +240,6 @@ impl VaultEngine {
             .map_err(FfiError::from)?;
         Ok(mappers::feed_log_to_dto(f))
     }
-
     pub fn list_feed_by_range(
         &self,
         from_millis: i64,
@@ -286,15 +257,11 @@ impl VaultEngine {
         let items = uc.execute(ListFeedByRangeCommand { from, to }).map_err(FfiError::from)?;
         Ok(items.into_iter().map(mappers::feed_log_to_dto).collect())
     }
-
     pub fn delete_feed(&self, id: String) -> Result<(), FfiError> {
         let uuid = Uuid::parse_str(&id)
             .map_err(|_| FfiError::Validation { msg: "invalid id".into() })?;
         DeleteFeedUseCase::new(&self.feed_repo).execute(uuid).map_err(FfiError::from)
     }
-
-    // --- Sleep ---
-
     pub fn log_sleep(
         &self,
         start_time_millis: i64,
@@ -315,7 +282,6 @@ impl VaultEngine {
             .map_err(FfiError::from)?;
         Ok(mappers::sleep_log_to_dto(s))
     }
-
     pub fn list_sleep_by_range(
         &self,
         from_millis: i64,
@@ -333,15 +299,11 @@ impl VaultEngine {
         let items = uc.execute(ListSleepByRangeCommand { from, to }).map_err(FfiError::from)?;
         Ok(items.into_iter().map(mappers::sleep_log_to_dto).collect())
     }
-
     pub fn delete_sleep(&self, id: String) -> Result<(), FfiError> {
         let uuid = Uuid::parse_str(&id)
             .map_err(|_| FfiError::Validation { msg: "invalid id".into() })?;
         DeleteSleepUseCase::new(&self.sleep_repo).execute(uuid).map_err(FfiError::from)
     }
-
-    // --- Diaper ---
-
     pub fn log_diaper(
         &self,
         diaper_type: DiaperTypeDto,
@@ -363,7 +325,6 @@ impl VaultEngine {
             .map_err(FfiError::from)?;
         Ok(mappers::diaper_log_to_dto(d))
     }
-
     pub fn list_diaper_by_range(
         &self,
         from_millis: i64,
@@ -381,15 +342,11 @@ impl VaultEngine {
         let items = uc.execute(ListDiaperByRangeCommand { from, to }).map_err(FfiError::from)?;
         Ok(items.into_iter().map(mappers::diaper_log_to_dto).collect())
     }
-
     pub fn delete_diaper(&self, id: String) -> Result<(), FfiError> {
         let uuid = Uuid::parse_str(&id)
             .map_err(|_| FfiError::Validation { msg: "invalid id".into() })?;
         DeleteDiaperUseCase::new(&self.diaper_repo).execute(uuid).map_err(FfiError::from)
     }
-
-    // --- Sync ---
-
     pub fn configure_sync_server(&self, server_url: String, api_key: String) -> Result<(), FfiError> {
         let mut guard = self
             .sync_config
@@ -398,7 +355,6 @@ impl VaultEngine {
         *guard = Some(SyncConfig { server_url, api_key });
         Ok(())
     }
-
     pub fn sync_now(&self) -> Result<SyncStatusDto, FfiError> {
         let guard = self
             .sync_config
@@ -407,25 +363,21 @@ impl VaultEngine {
         let config = guard
             .as_ref()
             .ok_or(FfiError::Validation { msg: "sync not configured".into() })?;
-
         let uc = SyncAllUseCase::new(&self.sync_repo, HttpSyncClient);
         let status = uc.execute(&config.server_url, &config.api_key).map_err(FfiError::from)?;
         Ok(sync_status_to_dto(status, true))
     }
-
     pub fn get_sync_status(&self) -> Result<SyncStatusDto, FfiError> {
         let is_configured = self
             .sync_config
             .lock()
             .map_err(|e| FfiError::Internal { msg: e.to_string() })?
             .is_some();
-
         let uc = SyncAllUseCase::new(&self.sync_repo, HttpSyncClient);
         let status = uc.get_status().map_err(FfiError::from)?;
         Ok(sync_status_to_dto(status, is_configured))
     }
 }
-
 impl VaultEngine {
     fn key(&self) -> Result<Zeroizing<Vec<u8>>, FfiError> {
         self.master_key
@@ -438,7 +390,6 @@ impl VaultEngine {
             })
     }
 }
-
 fn sync_status_to_dto(s: crate::domain::sync::entity::SyncStatus, is_configured: bool) -> SyncStatusDto {
     SyncStatusDto {
         pending_milestones: s.pending_milestones,

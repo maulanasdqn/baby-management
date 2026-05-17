@@ -1,5 +1,4 @@
 package com.babyvault.android.data.engine
-
 import com.babyvault.android.core.vault.VaultEngineProvider
 import com.babyvault.android.data.mapper.toDomain
 import com.babyvault.android.domain.model.GrowthLog
@@ -8,11 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
-
 class EngineGrowthRepository @Inject constructor(
     private val provider: VaultEngineProvider,
 ) : GrowthRepository {
-
     override suspend fun log(
         weightGrams: Int?,
         heightMm: Int?,
@@ -28,7 +25,6 @@ class EngineGrowthRepository @Inject constructor(
             ).toDomain()
         }
     }
-
     override suspend fun listByRange(from: Instant, to: Instant): Result<List<GrowthLog>> =
         withContext(Dispatchers.IO) {
             runCatching {

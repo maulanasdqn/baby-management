@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.insights
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,15 +15,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
-
 @Composable
 fun InsightsScreen(viewModel: InsightsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
-
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         InsightsHeader()
         HorizontalDivider()
-
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -34,14 +30,11 @@ fun InsightsScreen(viewModel: InsightsViewModel = hiltViewModel()) {
                 InsightStatCard(Icons.Filled.Bedtime,    SkyBlue100, SkyBlue400, "Sleeps",  "${state.sleepCount}",  Modifier.weight(1f))
                 InsightStatCard(Icons.Filled.ChildCare,  Sage100,    Sage400,    "Diapers", "${state.diaperCount}", Modifier.weight(1f))
             }
-
             AvgSleepCard(label = state.avgSleepLabel)
-
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Sleep this week", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = TextPrimary)
                 SleepBarChart(state.sleepMinutesByDay)
             }
-
             if (state.feedCount > 0) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Feed breakdown", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = TextPrimary)
@@ -52,12 +45,10 @@ fun InsightsScreen(viewModel: InsightsViewModel = hiltViewModel()) {
                     }
                 }
             }
-
             Spacer(Modifier.height(8.dp))
         }
     }
 }
-
 @Composable
 private fun InsightsHeader() {
     Column(
@@ -70,7 +61,6 @@ private fun InsightsHeader() {
         Text("Last 7 days", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
     }
 }
-
 @Composable
 private fun AvgSleepCard(label: String) {
     Card(

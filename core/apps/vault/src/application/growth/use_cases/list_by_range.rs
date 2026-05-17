@@ -2,28 +2,23 @@ use crate::application::growth::error::GrowthError;
 use crate::domain::growth::entity::GrowthLog;
 use crate::domain::growth::repository::GrowthRepository;
 use chrono::{DateTime, Utc};
-
 pub struct ListGrowthByRangeCommand {
     pub from: DateTime<Utc>,
     pub to: DateTime<Utc>,
 }
-
 pub struct ListGrowthByRangeUseCase<R> {
     repository: R,
 }
-
 impl<R: GrowthRepository> ListGrowthByRangeUseCase<R> {
     pub fn new(repository: R) -> Self {
         Self { repository }
     }
-
     pub fn execute(&self, cmd: ListGrowthByRangeCommand) -> Result<Vec<GrowthLog>, GrowthError> {
         self.repository
             .list_by_range(cmd.from, cmd.to)
             .map_err(GrowthError::from)
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -33,9 +28,7 @@ mod tests {
     use config::error_db::RepositoryError;
     use std::sync::Mutex;
     use uuid::Uuid;
-
     struct FakeRepo(Mutex<Vec<GrowthLog>>);
-
     impl GrowthRepository for FakeRepo {
         fn find_by_id(&self, id: Uuid) -> Result<Option<GrowthLog>, RepositoryError> {
             Ok(self.0.lock().unwrap().iter().find(|g| g.id == id).map(|g| GrowthLog {
@@ -59,7 +52,6 @@ mod tests {
             Ok(())
         }
     }
-
     fn growth_log_at(offset_days: i64) -> GrowthLog {
         GrowthLog {
             id: Uuid::new_v4(),
@@ -69,7 +61,6 @@ mod tests {
             logged_at: Utc::now() - Duration::days(offset_days),
         }
     }
-
     #[test]
     fn list_by_range_empty_repo_returns_empty() {
         let repo = FakeRepo(Mutex::new(vec![]));
@@ -81,7 +72,6 @@ mod tests {
         .unwrap();
         assert!(result.is_empty());
     }
-
     #[test]
     fn list_by_range_returns_only_items_in_range() {
         let inside = growth_log_at(5);

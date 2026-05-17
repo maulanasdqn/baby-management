@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.log
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babyvault.android.domain.model.FeedType
@@ -15,7 +14,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 data class FeedTimerState(
     val elapsedSeconds: Long = 0L,
     val isRunning: Boolean = false,
@@ -23,17 +21,13 @@ data class FeedTimerState(
 ) {
     val elapsedLabel: String get() = formatElapsedSeconds(elapsedSeconds)
 }
-
 @HiltViewModel
 class FeedTimerViewModel @Inject constructor(private val logFeed: LogFeedUseCase) : ViewModel() {
     private val _state = MutableStateFlow(FeedTimerState())
     val state: StateFlow<FeedTimerState> = _state
-
     private val _saved = Channel<Unit>(Channel.BUFFERED)
     val saved = _saved.receiveAsFlow()
-
     private var timerJob: Job? = null
-
     fun start() {
         if (_state.value.isRunning) return
         _state.update { it.copy(isRunning = true) }
@@ -44,12 +38,10 @@ class FeedTimerViewModel @Inject constructor(private val logFeed: LogFeedUseCase
             }
         }
     }
-
     fun pause() {
         _state.update { it.copy(isRunning = false) }
         timerJob?.cancel()
     }
-
     fun stop() {
         pause()
         val elapsed = _state.value.elapsedSeconds
@@ -65,8 +57,6 @@ class FeedTimerViewModel @Inject constructor(private val logFeed: LogFeedUseCase
             _saved.send(Unit)
         }
     }
-
     fun setSide(side: String) { _state.update { it.copy(side = side) } }
-
     override fun onCleared() { timerJob?.cancel() }
 }

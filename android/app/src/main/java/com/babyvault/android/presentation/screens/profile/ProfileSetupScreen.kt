@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.profile
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,21 +16,17 @@ import com.babyvault.android.presentation.theme.Teal400
 import com.babyvault.android.presentation.theme.Teal600
 import java.time.LocalDate
 import java.time.ZoneOffset
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSetupScreen(onDone: () -> Unit, viewModel: ProfileSetupViewModel = hiltViewModel()) {
     val saved by viewModel.saved.collectAsState()
     LaunchedEffect(saved) { if (saved) onDone() }
-
     var name by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now().minusMonths(3)) }
     var showDatePicker by remember { mutableStateOf(false) }
-
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
     )
-
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -45,7 +40,6 @@ fun ProfileSetupScreen(onDone: () -> Unit, viewModel: ProfileSetupViewModel = hi
             },
         ) { DatePicker(state = datePickerState) }
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()

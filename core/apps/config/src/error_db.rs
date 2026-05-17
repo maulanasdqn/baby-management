@@ -1,12 +1,10 @@
 use std::fmt;
-
 #[derive(Debug)]
 pub enum RepositoryError {
     NotFound,
     Conflict(String),
     Database(String),
 }
-
 impl fmt::Display for RepositoryError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -16,5 +14,4 @@ impl fmt::Display for RepositoryError {
         }
     }
 }
-
 impl std::error::Error for RepositoryError {}

@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.growth
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,16 +30,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.domain.model.GrowthLog
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
 private val DATE_FMT = DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm").withZone(ZoneId.systemDefault())
-
 @Composable
 fun GrowthScreen(viewModel: GrowthViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     var weight by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
-
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -94,7 +90,6 @@ fun GrowthScreen(viewModel: GrowthViewModel = hiltViewModel()) {
                         }
                     }
                 }
-
                 item {
                     Text(
                         "History",
@@ -102,7 +97,6 @@ fun GrowthScreen(viewModel: GrowthViewModel = hiltViewModel()) {
                         modifier = Modifier.padding(top = 4.dp),
                     )
                 }
-
                 if (state.logs.isEmpty()) {
                     item {
                         Text(
@@ -116,7 +110,6 @@ fun GrowthScreen(viewModel: GrowthViewModel = hiltViewModel()) {
                         GrowthLogCard(log)
                     }
                 }
-
                 state.error?.let {
                     item {
                         Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -126,7 +119,6 @@ fun GrowthScreen(viewModel: GrowthViewModel = hiltViewModel()) {
         }
     }
 }
-
 @Composable
 private fun GrowthLogCard(log: GrowthLog) {
     Card(modifier = Modifier.fillMaxWidth()) {

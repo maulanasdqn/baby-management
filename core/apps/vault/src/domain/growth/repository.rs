@@ -1,9 +1,7 @@
 pub use config::error_db::RepositoryError;
-
 use crate::domain::growth::entity::{GrowthLog, NewGrowthLog};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-
 pub trait GrowthRepository: Send + Sync {
     fn find_by_id(&self, id: Uuid) -> Result<Option<GrowthLog>, RepositoryError>;
     fn list_by_range(
@@ -14,7 +12,6 @@ pub trait GrowthRepository: Send + Sync {
     fn create(&self, log: NewGrowthLog) -> Result<GrowthLog, RepositoryError>;
     fn delete(&self, id: Uuid) -> Result<(), RepositoryError>;
 }
-
 impl<T: GrowthRepository + ?Sized> GrowthRepository for &T {
     fn find_by_id(&self, id: Uuid) -> Result<Option<GrowthLog>, RepositoryError> {
         (**self).find_by_id(id)

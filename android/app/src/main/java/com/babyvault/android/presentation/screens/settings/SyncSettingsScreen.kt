@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.settings
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,9 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
 private val DATE_FMT = DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm").withZone(ZoneId.systemDefault())
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SyncSettingsScreen(
@@ -52,10 +49,8 @@ fun SyncSettingsScreen(
     viewModel: SyncSettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-
     var serverUrl by remember { mutableStateOf("") }
     var apiKey by remember { mutableStateOf("") }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,7 +69,6 @@ fun SyncSettingsScreen(
             }
             return@Scaffold
         }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -83,7 +77,6 @@ fun SyncSettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Status card
             state.status?.let { status ->
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -109,8 +102,6 @@ fun SyncSettingsScreen(
                     }
                 }
             }
-
-            // Config form
             Text("Server Configuration", style = MaterialTheme.typography.titleMedium)
             OutlinedTextField(
                 value = serverUrl,
@@ -128,18 +119,15 @@ fun SyncSettingsScreen(
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
             )
-
             if (state.saved) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Text("Saved and scheduled", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall)
                 }
             }
-
             state.error?.let {
                 Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
-
             Button(
                 onClick = { viewModel.configure(serverUrl, apiKey) },
                 enabled = serverUrl.isNotBlank() && apiKey.isNotBlank(),
@@ -147,10 +135,7 @@ fun SyncSettingsScreen(
             ) {
                 Text("Save & Enable Sync")
             }
-
             Spacer(Modifier.height(8.dp))
-
-            // Manual sync
             OutlinedButton(
                 onClick = { viewModel.triggerSync() },
                 enabled = state.status?.isConfigured == true && !state.isSyncing,

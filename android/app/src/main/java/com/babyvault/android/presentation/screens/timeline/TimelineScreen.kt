@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.timeline
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,15 +37,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.domain.model.Milestone
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
 private val DATE_FMT = DateTimeFormatter.ofPattern("MMM d, yyyy").withZone(ZoneId.systemDefault())
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimelineScreen(viewModel: TimelineViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     var showAddSheet by remember { mutableStateOf(false) }
-
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -74,13 +70,11 @@ fun TimelineScreen(viewModel: TimelineViewModel = hiltViewModel()) {
                 }
             }
         }
-
         state.error?.let {
             Snackbar(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 72.dp, start = 16.dp, end = 16.dp)) {
                 Text(it)
             }
         }
-
         FloatingActionButton(
             onClick = { showAddSheet = true },
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
@@ -88,7 +82,6 @@ fun TimelineScreen(viewModel: TimelineViewModel = hiltViewModel()) {
             Icon(Icons.Default.Add, contentDescription = "Add Milestone")
         }
     }
-
     if (showAddSheet) {
         AddMilestoneSheet(
             onDismiss = { showAddSheet = false },
@@ -99,7 +92,6 @@ fun TimelineScreen(viewModel: TimelineViewModel = hiltViewModel()) {
         )
     }
 }
-
 @Composable
 private fun MilestoneCard(milestone: Milestone, onDelete: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -129,13 +121,11 @@ private fun MilestoneCard(milestone: Milestone, onDelete: () -> Unit) {
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddMilestoneSheet(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier

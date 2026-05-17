@@ -1,5 +1,3 @@
-// UniFFI-compatible data transfer objects. Uuid → String, DateTime<Utc> → i64 millis.
-
 #[derive(uniffi::Record)]
 pub struct MilestoneDto {
     pub id: String,
@@ -8,7 +6,6 @@ pub struct MilestoneDto {
     pub occurred_at_millis: i64,
     pub created_at_millis: i64,
 }
-
 #[derive(uniffi::Record)]
 pub struct GrowthLogDto {
     pub id: String,
@@ -17,7 +14,6 @@ pub struct GrowthLogDto {
     pub notes: String,
     pub logged_at_millis: i64,
 }
-
 #[derive(uniffi::Record)]
 pub struct MediaItemDto {
     pub id: String,
@@ -26,7 +22,6 @@ pub struct MediaItemDto {
     pub size_bytes: u64,
     pub created_at_millis: i64,
 }
-
 #[derive(uniffi::Record)]
 pub struct SyncStatusDto {
     pub pending_milestones: u32,
@@ -35,14 +30,12 @@ pub struct SyncStatusDto {
     pub last_synced_at_millis: Option<i64>,
     pub is_configured: bool,
 }
-
 #[derive(uniffi::Enum)]
 pub enum FeedTypeDto {
     Breast,
     Bottle,
     Solid,
 }
-
 #[derive(uniffi::Record)]
 pub struct FeedLogDto {
     pub id: String,
@@ -53,7 +46,6 @@ pub struct FeedLogDto {
     pub notes: String,
     pub logged_at_millis: i64,
 }
-
 #[derive(uniffi::Record)]
 pub struct SleepLogDto {
     pub id: String,
@@ -62,14 +54,12 @@ pub struct SleepLogDto {
     pub notes: String,
     pub duration_minutes: i64,
 }
-
 #[derive(uniffi::Enum)]
 pub enum DiaperTypeDto {
     Wet,
     Dirty,
     Both,
 }
-
 #[derive(uniffi::Record)]
 pub struct DiaperLogDto {
     pub id: String,

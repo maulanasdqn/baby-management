@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.splash
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
@@ -18,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.Teal400
 import com.babyvault.android.presentation.theme.Teal600
-
 @Composable
 fun SplashScreen(
     onVaultReady: () -> Unit,
@@ -27,7 +25,6 @@ fun SplashScreen(
     viewModel: SplashViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-
     LaunchedEffect(state) {
         when (state) {
             SplashState.Ready -> onVaultReady()
@@ -36,7 +33,6 @@ fun SplashScreen(
             SplashState.Loading -> Unit
         }
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()

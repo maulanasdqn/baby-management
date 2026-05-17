@@ -1,7 +1,6 @@
 use crate::domain::milestone::errors::MilestoneDomainError;
 use config::error_db::RepositoryError;
 use std::fmt;
-
 #[derive(Debug)]
 pub enum MilestoneError {
     NotFound,
@@ -9,7 +8,6 @@ pub enum MilestoneError {
     InvalidOccurredAt,
     Internal(String),
 }
-
 impl fmt::Display for MilestoneError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -20,9 +18,7 @@ impl fmt::Display for MilestoneError {
         }
     }
 }
-
 impl std::error::Error for MilestoneError {}
-
 impl From<RepositoryError> for MilestoneError {
     fn from(e: RepositoryError) -> Self {
         match e {
@@ -32,7 +28,6 @@ impl From<RepositoryError> for MilestoneError {
         }
     }
 }
-
 impl From<MilestoneDomainError> for MilestoneError {
     fn from(e: MilestoneDomainError) -> Self {
         match e {

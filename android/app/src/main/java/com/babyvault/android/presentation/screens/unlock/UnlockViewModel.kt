@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.unlock
-
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.byteArrayPreferencesKey
@@ -15,7 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 sealed interface UnlockState {
     data object Idle : UnlockState
     data object Unlocking : UnlockState
@@ -23,9 +21,7 @@ sealed interface UnlockState {
     data object NeedProfile : UnlockState
     data class Error(val message: String) : UnlockState
 }
-
 private val WRAPPED_KEY = byteArrayPreferencesKey("wrapped_master_key")
-
 @HiltViewModel
 class UnlockViewModel @Inject constructor(
     private val unlockVault: UnlockVaultUseCase,
@@ -33,10 +29,8 @@ class UnlockViewModel @Inject constructor(
     private val dataStore: DataStore<Preferences>,
     private val profileStore: BabyProfileStore,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow<UnlockState>(UnlockState.Idle)
     val state: StateFlow<UnlockState> = _state.asStateFlow()
-
     fun onBiometricSuccess() {
         viewModelScope.launch {
             _state.value = UnlockState.Unlocking
@@ -59,7 +53,6 @@ class UnlockViewModel @Inject constructor(
             )
         }
     }
-
     fun onBiometricError(msg: String) {
         _state.value = UnlockState.Error(msg)
     }

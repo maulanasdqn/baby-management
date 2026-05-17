@@ -7,7 +7,6 @@ use crate::application::sleep::error::SleepError;
 use crate::application::sync::error::SyncError;
 use crate::application::vault::error::VaultError;
 use std::fmt;
-
 #[derive(Debug, uniffi::Error)]
 pub enum FfiError {
     NotFound,
@@ -15,7 +14,6 @@ pub enum FfiError {
     Crypto { msg: String },
     Internal { msg: String },
 }
-
 impl fmt::Display for FfiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -26,9 +24,7 @@ impl fmt::Display for FfiError {
         }
     }
 }
-
 impl std::error::Error for FfiError {}
-
 impl From<MilestoneError> for FfiError {
     fn from(e: MilestoneError) -> Self {
         match e {
@@ -40,7 +36,6 @@ impl From<MilestoneError> for FfiError {
         }
     }
 }
-
 impl From<GrowthError> for FfiError {
     fn from(e: GrowthError) -> Self {
         match e {
@@ -50,7 +45,6 @@ impl From<GrowthError> for FfiError {
         }
     }
 }
-
 impl From<MediaError> for FfiError {
     fn from(e: MediaError) -> Self {
         match e {
@@ -63,7 +57,6 @@ impl From<MediaError> for FfiError {
         }
     }
 }
-
 impl From<SyncError> for FfiError {
     fn from(e: SyncError) -> Self {
         match e {
@@ -74,7 +67,6 @@ impl From<SyncError> for FfiError {
         }
     }
 }
-
 impl From<VaultError> for FfiError {
     fn from(e: VaultError) -> Self {
         match e {
@@ -88,7 +80,6 @@ impl From<VaultError> for FfiError {
         }
     }
 }
-
 impl From<FeedError> for FfiError {
     fn from(e: FeedError) -> Self {
         match e {
@@ -98,7 +89,6 @@ impl From<FeedError> for FfiError {
         }
     }
 }
-
 impl From<SleepError> for FfiError {
     fn from(e: SleepError) -> Self {
         match e {
@@ -108,7 +98,6 @@ impl From<SleepError> for FfiError {
         }
     }
 }
-
 impl From<DiaperError> for FfiError {
     fn from(e: DiaperError) -> Self {
         match e {

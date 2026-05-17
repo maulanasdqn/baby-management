@@ -4,18 +4,15 @@ use crate::infrastructure::repository::sqlite_pool::Pool;
 use chrono::{DateTime, TimeZone, Utc};
 use config::error_db::RepositoryError;
 use uuid::Uuid;
-
 #[derive(Clone)]
 pub struct SqliteSleepRepository {
     pool: Pool,
 }
-
 impl SqliteSleepRepository {
     pub fn new(pool: Pool) -> Self {
         Self { pool }
     }
 }
-
 impl SleepRepository for SqliteSleepRepository {
     fn find_by_id(&self, id: Uuid) -> Result<Option<SleepLog>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
@@ -26,7 +23,6 @@ impl SleepRepository for SqliteSleepRepository {
             .optional()
             .map_err(|e| RepositoryError::Database(e.to_string()))
     }
-
     fn list_by_range(&self, from: DateTime<Utc>, to: DateTime<Utc>) -> Result<Vec<SleepLog>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         let mut stmt = conn
@@ -38,7 +34,6 @@ impl SleepRepository for SqliteSleepRepository {
         rows.collect::<Result<Vec<_>, _>>()
             .map_err(|e| RepositoryError::Database(e.to_string()))
     }
-
     fn create(&self, s: NewSleepLog) -> Result<SleepLog, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         conn.execute(
@@ -58,7 +53,6 @@ impl SleepRepository for SqliteSleepRepository {
             notes: s.notes,
         })
     }
-
     fn delete(&self, id: Uuid) -> Result<(), RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         conn.execute("DELETE FROM sleep_logs WHERE id = ?1", [id.to_string()])
@@ -66,7 +60,6 @@ impl SleepRepository for SqliteSleepRepository {
         Ok(())
     }
 }
-
 fn row_to_sleep_log(row: &rusqlite::Row) -> rusqlite::Result<SleepLog> {
     let id_str: String = row.get(0)?;
     let start_ms: i64 = row.get(1)?;
@@ -78,11 +71,9 @@ fn row_to_sleep_log(row: &rusqlite::Row) -> rusqlite::Result<SleepLog> {
         notes: row.get(3)?,
     })
 }
-
 trait OptionalExt<T> {
     fn optional(self) -> rusqlite::Result<Option<T>>;
 }
-
 impl<T> OptionalExt<T> for rusqlite::Result<T> {
     fn optional(self) -> rusqlite::Result<Option<T>> {
         match self {

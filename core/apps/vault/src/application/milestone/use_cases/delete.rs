@@ -1,22 +1,18 @@
 use crate::application::milestone::error::MilestoneError;
 use crate::domain::milestone::repository::MilestoneRepository;
 use uuid::Uuid;
-
 pub struct DeleteMilestoneUseCase<R> {
     repository: R,
 }
-
 impl<R: MilestoneRepository> DeleteMilestoneUseCase<R> {
     pub fn new(repository: R) -> Self {
         Self { repository }
     }
-
     pub fn execute(&self, id: Uuid) -> Result<(), MilestoneError> {
         self.repository.find_by_id(id)?.ok_or(MilestoneError::NotFound)?;
         self.repository.delete(id).map_err(MilestoneError::from)
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -25,9 +21,7 @@ mod tests {
     use chrono::Utc;
     use config::error_db::RepositoryError;
     use std::sync::Mutex;
-
     struct FakeRepo(Mutex<Vec<Milestone>>);
-
     impl MilestoneRepository for FakeRepo {
         fn find_by_id(&self, id: Uuid) -> Result<Option<Milestone>, RepositoryError> {
             Ok(self.0.lock().unwrap().iter().find(|m| m.id == id).map(|m| Milestone {
@@ -49,7 +43,6 @@ mod tests {
             Ok(())
         }
     }
-
     #[test]
     fn delete_existing_milestone_succeeds() {
         let id = Uuid::new_v4();
@@ -64,7 +57,6 @@ mod tests {
         assert!(uc.execute(id).is_ok());
         assert!(repo.0.lock().unwrap().is_empty());
     }
-
     #[test]
     fn delete_nonexistent_milestone_returns_not_found() {
         let repo = FakeRepo(Mutex::new(vec![]));

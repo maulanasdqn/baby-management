@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.history
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babyvault.android.domain.usecase.ListDiaperByRangeUseCase
@@ -15,10 +14,8 @@ import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-
 data class HistoryItem(val id: String, val label: String, val subtitle: String, val timeLabel: String)
 data class HistoryState(val items: List<HistoryItem> = emptyList(), val isLoading: Boolean = false)
-
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val listFeed: ListFeedByRangeUseCase,
@@ -28,13 +25,10 @@ class HistoryViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(HistoryState(isLoading = true))
     val state: StateFlow<HistoryState> = _state.asStateFlow()
-
     private val fmt = DateTimeFormatter.ofPattern("MMM d, HH:mm").withZone(ZoneId.systemDefault())
-
     init {
         loadRange(7)
     }
-
     fun loadRange(days: Int) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
@@ -43,10 +37,8 @@ class HistoryViewModel @Inject constructor(
             loadInternal(from, to)
         }
     }
-
     private suspend fun loadInternal(from: Long, to: Long) {
         val items = mutableListOf<HistoryItem>()
-
         listFeed(from, to).getOrNull()?.forEach { f ->
             items += HistoryItem(
                 id = "feed_${f.id}",
@@ -59,7 +51,6 @@ class HistoryViewModel @Inject constructor(
                 timeLabel = fmt.format(f.loggedAt),
             )
         }
-
         listSleep(from, to).getOrNull()?.forEach { s ->
             val hours = s.durationMinutes / 60
             val mins = s.durationMinutes % 60
@@ -70,7 +61,6 @@ class HistoryViewModel @Inject constructor(
                 timeLabel = fmt.format(s.startTime),
             )
         }
-
         listDiaper(from, to).getOrNull()?.forEach { d ->
             items += HistoryItem(
                 id = "diaper_${d.id}",
@@ -79,7 +69,6 @@ class HistoryViewModel @Inject constructor(
                 timeLabel = fmt.format(d.loggedAt),
             )
         }
-
         listMilestones(20, 0).getOrNull()?.forEach { m ->
             items += HistoryItem(
                 id = "milestone_${m.id}",
@@ -88,7 +77,6 @@ class HistoryViewModel @Inject constructor(
                 timeLabel = fmt.format(m.occurredAt),
             )
         }
-
         items.sortByDescending { it.timeLabel }
         _state.value = HistoryState(items = items, isLoading = false)
     }

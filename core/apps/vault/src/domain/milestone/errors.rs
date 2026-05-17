@@ -1,12 +1,9 @@
-// Domain-level validation errors for milestones.
 use std::fmt;
-
 #[derive(Debug)]
 pub enum MilestoneDomainError {
     TitleEmpty,
     OccurredAtInFuture,
 }
-
 impl fmt::Display for MilestoneDomainError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -15,5 +12,4 @@ impl fmt::Display for MilestoneDomainError {
         }
     }
 }
-
 impl std::error::Error for MilestoneDomainError {}

@@ -1,7 +1,6 @@
 use crate::domain::vault::errors::CryptoError;
 use config::error_db::RepositoryError;
 use std::fmt;
-
 #[derive(Debug)]
 pub enum MediaError {
     NotFound,
@@ -10,7 +9,6 @@ pub enum MediaError {
     DecryptionFailed(String),
     Internal(String),
 }
-
 impl fmt::Display for MediaError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -22,9 +20,7 @@ impl fmt::Display for MediaError {
         }
     }
 }
-
 impl std::error::Error for MediaError {}
-
 impl From<RepositoryError> for MediaError {
     fn from(e: RepositoryError) -> Self {
         match e {
@@ -33,7 +29,6 @@ impl From<RepositoryError> for MediaError {
         }
     }
 }
-
 impl From<CryptoError> for MediaError {
     fn from(e: CryptoError) -> Self {
         match e {

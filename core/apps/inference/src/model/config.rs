@@ -1,5 +1,4 @@
 use serde::Deserialize;
-
 #[derive(Debug, Clone, Deserialize)]
 pub struct GemmaConfig {
     pub vocab_size: usize,
@@ -13,7 +12,6 @@ pub struct GemmaConfig {
     pub rms_norm_eps: f64,
     pub rope_theta: f64,
 }
-
 impl Default for GemmaConfig {
     fn default() -> Self {
         Self {
@@ -30,7 +28,6 @@ impl Default for GemmaConfig {
         }
     }
 }
-
 impl GemmaConfig {
     pub fn from_file(path: &str) -> Result<Self, String> {
         let json = std::fs::read_to_string(path)

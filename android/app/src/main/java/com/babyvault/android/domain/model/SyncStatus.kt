@@ -1,7 +1,5 @@
 package com.babyvault.android.domain.model
-
 import java.time.Instant
-
 data class SyncStatus(
     val pendingMilestones: Int,
     val pendingGrowthLogs: Int,

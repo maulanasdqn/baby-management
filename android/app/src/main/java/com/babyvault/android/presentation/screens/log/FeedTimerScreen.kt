@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.log
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,13 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedTimerScreen(onBack: () -> Unit, viewModel: FeedTimerViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     LaunchedEffect(Unit) { viewModel.saved.collect { onBack() } }
-
     Scaffold(
         containerColor = NeutralGray,
         topBar = {
@@ -54,7 +51,6 @@ fun FeedTimerScreen(onBack: () -> Unit, viewModel: FeedTimerViewModel = hiltView
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
         ) {
-            // Circular timer display in Peach tones
             Surface(
                 shape = CircleShape,
                 color = Peach100,
@@ -69,8 +65,6 @@ fun FeedTimerScreen(onBack: () -> Unit, viewModel: FeedTimerViewModel = hiltView
                     )
                 }
             }
-
-            // Side selector
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -90,8 +84,6 @@ fun FeedTimerScreen(onBack: () -> Unit, viewModel: FeedTimerViewModel = hiltView
                     }
                 }
             }
-
-            // Playback controls
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -147,7 +139,6 @@ fun FeedTimerScreen(onBack: () -> Unit, viewModel: FeedTimerViewModel = hiltView
                     }
                 }
             }
-
             Text(
                 "Tap stop to save the session",
                 style = MaterialTheme.typography.bodySmall,

@@ -1,12 +1,10 @@
 use config::error_db::RepositoryError;
 use std::fmt;
-
 #[derive(Debug)]
 pub enum DiaperError {
     NotFound,
     Internal(String),
 }
-
 impl fmt::Display for DiaperError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -15,9 +13,7 @@ impl fmt::Display for DiaperError {
         }
     }
 }
-
 impl std::error::Error for DiaperError {}
-
 impl From<RepositoryError> for DiaperError {
     fn from(e: RepositoryError) -> Self {
         match e {

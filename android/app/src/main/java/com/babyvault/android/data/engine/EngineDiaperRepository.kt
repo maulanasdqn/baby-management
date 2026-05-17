@@ -1,5 +1,4 @@
 package com.babyvault.android.data.engine
-
 import com.babyvault.android.core.vault.VaultEngineProvider
 import com.babyvault.android.domain.model.DiaperLog
 import com.babyvault.android.domain.model.DiaperType
@@ -9,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
-
 class EngineDiaperRepository @Inject constructor(
     private val provider: VaultEngineProvider,
 ) : DiaperRepository {
@@ -27,16 +25,13 @@ class EngineDiaperRepository @Inject constructor(
                 ).toDomain()
             }
         }
-
     override suspend fun listByRange(fromMillis: Long, toMillis: Long): Result<List<DiaperLog>> =
         withContext(Dispatchers.IO) {
             runCatching { provider.engine.listDiaperByRange(fromMillis, toMillis).map { it.toDomain() } }
         }
-
     override suspend fun delete(id: String): Result<Unit> =
         withContext(Dispatchers.IO) { runCatching { provider.engine.deleteDiaper(id) } }
 }
-
 private fun com.babyvault.core.DiaperLogDto.toDomain() = DiaperLog(
     id = id,
     diaperType = when (diaperType) {

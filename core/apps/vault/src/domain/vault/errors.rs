@@ -1,5 +1,4 @@
 use std::fmt;
-
 #[derive(Debug)]
 pub enum CryptoError {
     EncryptionFailed(String),
@@ -7,7 +6,6 @@ pub enum CryptoError {
     InvalidKey(String),
     Io(String),
 }
-
 impl fmt::Display for CryptoError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -18,5 +16,4 @@ impl fmt::Display for CryptoError {
         }
     }
 }
-
 impl std::error::Error for CryptoError {}

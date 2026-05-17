@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.nav
-
 import android.app.Activity
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
@@ -29,7 +28,6 @@ import com.babyvault.android.presentation.screens.splash.SplashScreen
 import com.babyvault.android.presentation.screens.timeline.TimelineScreen
 import com.babyvault.android.presentation.screens.unlock.UnlockScreen
 import com.babyvault.android.presentation.ui.BottomNavBar
-
 private val bottomNavRoutes = setOf(
     Routes.HOME,
     Routes.HISTORY,
@@ -37,7 +35,6 @@ private val bottomNavRoutes = setOf(
     Routes.CHAT,
     Routes.SETTINGS,
 )
-
 private val lightStatusBarRoutes = setOf(
     Routes.HOME,
     Routes.HISTORY,
@@ -53,20 +50,17 @@ private val lightStatusBarRoutes = setOf(
     Routes.CHAT,
     Routes.MODEL_SETUP,
 )
-
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route ?: Routes.SPLASH
     val view = LocalView.current
-
     SideEffect {
         val window = (view.context as Activity).window
         WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars =
             currentRoute in lightStatusBarRoutes
     }
-
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         bottomBar = {

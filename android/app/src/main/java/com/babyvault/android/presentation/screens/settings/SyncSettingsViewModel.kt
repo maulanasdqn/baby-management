@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.settings
-
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 data class SyncSettingsUiState(
     val status: SyncStatus? = null,
     val isLoading: Boolean = true,
@@ -23,7 +21,6 @@ data class SyncSettingsUiState(
     val error: String? = null,
     val saved: Boolean = false,
 )
-
 @HiltViewModel
 class SyncSettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -31,14 +28,11 @@ class SyncSettingsViewModel @Inject constructor(
     private val syncNow: SyncNowUseCase,
     private val getStatus: GetSyncStatusUseCase,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(SyncSettingsUiState())
     val state: StateFlow<SyncSettingsUiState> = _state.asStateFlow()
-
     init {
         loadStatus()
     }
-
     fun loadStatus() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -47,7 +41,6 @@ class SyncSettingsViewModel @Inject constructor(
                 .onFailure { _state.value = SyncSettingsUiState(isLoading = false, error = it.message) }
         }
     }
-
     fun configure(serverUrl: String, apiKey: String) {
         if (serverUrl.isBlank() || apiKey.isBlank()) return
         viewModelScope.launch {
@@ -61,7 +54,6 @@ class SyncSettingsViewModel @Inject constructor(
                 .onFailure { _state.value = _state.value.copy(isLoading = false, error = it.message) }
         }
     }
-
     fun triggerSync() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isSyncing = true, error = null)

@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.chat
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
-
 @Composable
 fun ChatScreen(
     onSetupModel: () -> Unit,
@@ -24,13 +22,10 @@ fun ChatScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val listState = rememberLazyListState()
-
     LaunchedEffect(state.messages.size) {
         if (state.messages.isNotEmpty()) listState.animateScrollToItem(state.messages.size - 1)
     }
-
     LaunchedEffect(Unit) { viewModel.refreshModelStatus() }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -38,11 +33,9 @@ fun ChatScreen(
     ) {
         ChatHeader()
         HorizontalDivider()
-
         if (!state.modelReady) {
             ModelBanner(onSetup = onSetupModel)
         }
-
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -55,7 +48,6 @@ fun ChatScreen(
                 ChatBubble(message = msg)
             }
         }
-
         ChatInputBar(
             isGenerating = state.isGenerating,
             onSend = { viewModel.send(it) },
@@ -63,7 +55,6 @@ fun ChatScreen(
         )
     }
 }
-
 @Composable
 private fun ModelBanner(onSetup: () -> Unit) {
     Row(
@@ -85,7 +76,6 @@ private fun ModelBanner(onSetup: () -> Unit) {
         }
     }
 }
-
 @Composable
 private fun ChatInputBar(
     isGenerating: Boolean,

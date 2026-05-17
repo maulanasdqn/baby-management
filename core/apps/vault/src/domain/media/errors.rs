@@ -1,10 +1,8 @@
 use std::fmt;
-
 #[derive(Debug)]
 pub enum MediaDomainError {
     TitleEmpty,
 }
-
 impl fmt::Display for MediaDomainError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -12,5 +10,4 @@ impl fmt::Display for MediaDomainError {
         }
     }
 }
-
 impl std::error::Error for MediaDomainError {}

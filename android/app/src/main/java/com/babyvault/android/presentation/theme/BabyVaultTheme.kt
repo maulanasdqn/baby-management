@@ -1,9 +1,7 @@
 package com.babyvault.android.presentation.theme
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-
 private val LightColorScheme = lightColorScheme(
     primary = Teal500,
     onPrimary = Color.White,
@@ -25,7 +23,6 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = TextSecondary,
     outline = Teal200,
 )
-
 @Composable
 fun BabyVaultTheme(content: @Composable () -> Unit) {
     MaterialTheme(

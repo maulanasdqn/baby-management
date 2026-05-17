@@ -4,18 +4,15 @@ use crate::infrastructure::repository::sqlite_pool::Pool;
 use chrono::{DateTime, TimeZone, Utc};
 use config::error_db::RepositoryError;
 use uuid::Uuid;
-
 #[derive(Clone)]
 pub struct SqliteFeedRepository {
     pool: Pool,
 }
-
 impl SqliteFeedRepository {
     pub fn new(pool: Pool) -> Self {
         Self { pool }
     }
 }
-
 impl FeedRepository for SqliteFeedRepository {
     fn find_by_id(&self, id: Uuid) -> Result<Option<FeedLog>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
@@ -26,7 +23,6 @@ impl FeedRepository for SqliteFeedRepository {
             .optional()
             .map_err(|e| RepositoryError::Database(e.to_string()))
     }
-
     fn list_by_range(&self, from: DateTime<Utc>, to: DateTime<Utc>) -> Result<Vec<FeedLog>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         let mut stmt = conn
@@ -38,7 +34,6 @@ impl FeedRepository for SqliteFeedRepository {
         rows.collect::<Result<Vec<_>, _>>()
             .map_err(|e| RepositoryError::Database(e.to_string()))
     }
-
     fn create(&self, f: NewFeedLog) -> Result<FeedLog, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         conn.execute(
@@ -64,7 +59,6 @@ impl FeedRepository for SqliteFeedRepository {
             logged_at: f.logged_at,
         })
     }
-
     fn delete(&self, id: Uuid) -> Result<(), RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         conn.execute("DELETE FROM feed_logs WHERE id = ?1", [id.to_string()])
@@ -72,7 +66,6 @@ impl FeedRepository for SqliteFeedRepository {
         Ok(())
     }
 }
-
 fn row_to_feed_log(row: &rusqlite::Row) -> rusqlite::Result<FeedLog> {
     let id_str: String = row.get(0)?;
     let type_str: String = row.get(1)?;
@@ -87,11 +80,9 @@ fn row_to_feed_log(row: &rusqlite::Row) -> rusqlite::Result<FeedLog> {
         logged_at: Utc.timestamp_millis_opt(logged_ms).single().unwrap_or_default(),
     })
 }
-
 trait OptionalExt<T> {
     fn optional(self) -> rusqlite::Result<Option<T>>;
 }
-
 impl<T> OptionalExt<T> for rusqlite::Result<T> {
     fn optional(self) -> rusqlite::Result<Option<T>> {
         match self {

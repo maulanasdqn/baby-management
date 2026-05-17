@@ -1,5 +1,4 @@
 package com.babyvault.android.di
-
 import com.babyvault.android.data.engine.EngineDiaperRepository
 import com.babyvault.android.data.engine.EngineFeedRepository
 import com.babyvault.android.data.engine.EngineGrowthRepository
@@ -21,7 +20,6 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {

@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.chat
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babyvault.android.ai.LocalAiService
@@ -10,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 data class ModelSetupState(
     val hfToken: String = "",
     val isDownloading: Boolean = false,
@@ -19,24 +17,19 @@ data class ModelSetupState(
     val error: String? = null,
     val isReady: Boolean = false,
 )
-
 @HiltViewModel
 class ModelSetupViewModel @Inject constructor(
     private val downloader: ModelDownloadManager,
     private val ai: LocalAiService,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(ModelSetupState())
     val state: StateFlow<ModelSetupState> = _state
-
     init {
         if (downloader.isDownloaded()) loadModel()
     }
-
     fun setToken(token: String) {
         _state.update { it.copy(hfToken = token, error = null) }
     }
-
     fun startDownload() {
         if (_state.value.isDownloading) return
         _state.update { it.copy(isDownloading = true, error = null, progress = 0f) }
@@ -54,7 +47,6 @@ class ModelSetupViewModel @Inject constructor(
             loadModel()
         }
     }
-
     private fun loadModel() {
         ai.loadModel(downloader.modelDir)
             .onSuccess { _state.update { it.copy(isDownloading = false, isReady = true) } }

@@ -1,10 +1,8 @@
 use std::fmt;
-
 #[derive(Debug)]
 pub enum DiaperDomainError {
     InvalidLoggedAt,
 }
-
 impl fmt::Display for DiaperDomainError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -12,5 +10,4 @@ impl fmt::Display for DiaperDomainError {
         }
     }
 }
-
 impl std::error::Error for DiaperDomainError {}

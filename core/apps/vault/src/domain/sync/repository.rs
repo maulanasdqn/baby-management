@@ -1,6 +1,5 @@
 use super::entity::{PendingMediaFile, SyncMediaRecord, SyncMilestoneRecord, SyncGrowthRecord, SyncStatus};
 use config::error_db::RepositoryError;
-
 pub trait SyncRepository: Send + Sync {
     fn get_pending_milestones(&self) -> Result<Vec<SyncMilestoneRecord>, RepositoryError>;
     fn get_pending_growth_logs(&self) -> Result<Vec<SyncGrowthRecord>, RepositoryError>;
@@ -10,7 +9,6 @@ pub trait SyncRepository: Send + Sync {
     fn get_last_synced_at(&self) -> Result<Option<i64>, RepositoryError>;
     fn get_status(&self) -> Result<SyncStatus, RepositoryError>;
 }
-
 impl<T: SyncRepository + ?Sized> SyncRepository for &T {
     fn get_pending_milestones(&self) -> Result<Vec<SyncMilestoneRecord>, RepositoryError> {
         (**self).get_pending_milestones()

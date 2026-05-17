@@ -1,6 +1,5 @@
 use crate::domain::vault::errors::CryptoError;
 use std::fmt;
-
 #[derive(Debug)]
 pub enum VaultError {
     AlreadyInitialized,
@@ -9,7 +8,6 @@ pub enum VaultError {
     CryptoFailed(String),
     Internal(String),
 }
-
 impl fmt::Display for VaultError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -21,9 +19,7 @@ impl fmt::Display for VaultError {
         }
     }
 }
-
 impl std::error::Error for VaultError {}
-
 impl From<CryptoError> for VaultError {
     fn from(e: CryptoError) -> Self {
         Self::CryptoFailed(e.to_string())

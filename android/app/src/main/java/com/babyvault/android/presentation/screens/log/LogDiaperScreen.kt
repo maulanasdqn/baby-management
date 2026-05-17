@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.log
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,15 +15,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.domain.model.DiaperType
 import com.babyvault.android.presentation.theme.*
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogDiaperScreen(onBack: () -> Unit, viewModel: LogDiaperViewModel = hiltViewModel()) {
     LaunchedEffect(Unit) { viewModel.saved.collect { onBack() } }
-
     var diaperType by remember { mutableStateOf(DiaperType.WET) }
     var notes by remember { mutableStateOf("") }
-
     Scaffold(
         containerColor = NeutralGray,
         topBar = {
@@ -55,7 +51,6 @@ fun LogDiaperScreen(onBack: () -> Unit, viewModel: LogDiaperViewModel = hiltView
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            // Icon header
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -87,8 +82,6 @@ fun LogDiaperScreen(onBack: () -> Unit, viewModel: LogDiaperViewModel = hiltView
                     )
                 }
             }
-
-            // Type chips
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     "Type",
@@ -105,7 +98,6 @@ fun LogDiaperScreen(onBack: () -> Unit, viewModel: LogDiaperViewModel = hiltView
                     }
                 }
             }
-
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
@@ -114,7 +106,6 @@ fun LogDiaperScreen(onBack: () -> Unit, viewModel: LogDiaperViewModel = hiltView
                 shape = RoundedCornerShape(14.dp),
                 minLines = 2,
             )
-
             Button(
                 onClick = { viewModel.save(diaperType, notes) },
                 modifier = Modifier
@@ -128,7 +119,6 @@ fun LogDiaperScreen(onBack: () -> Unit, viewModel: LogDiaperViewModel = hiltView
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
-
             Spacer(Modifier.height(8.dp))
         }
     }

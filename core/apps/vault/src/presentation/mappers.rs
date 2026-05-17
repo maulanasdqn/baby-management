@@ -8,7 +8,6 @@ use crate::presentation::dto::{
     DiaperLogDto, DiaperTypeDto, FeedLogDto, FeedTypeDto, GrowthLogDto, MediaItemDto,
     MilestoneDto, SleepLogDto,
 };
-
 pub fn milestone_to_dto(m: Milestone) -> MilestoneDto {
     MilestoneDto {
         id: m.id.to_string(),
@@ -18,7 +17,6 @@ pub fn milestone_to_dto(m: Milestone) -> MilestoneDto {
         created_at_millis: m.created_at.timestamp_millis(),
     }
 }
-
 pub fn growth_log_to_dto(g: GrowthLog) -> GrowthLogDto {
     GrowthLogDto {
         id: g.id.to_string(),
@@ -28,7 +26,6 @@ pub fn growth_log_to_dto(g: GrowthLog) -> GrowthLogDto {
         logged_at_millis: g.logged_at.timestamp_millis(),
     }
 }
-
 pub fn media_item_to_dto(m: MediaItem) -> MediaItemDto {
     MediaItemDto {
         id: m.id.to_string(),
@@ -38,7 +35,6 @@ pub fn media_item_to_dto(m: MediaItem) -> MediaItemDto {
         created_at_millis: m.created_at.timestamp_millis(),
     }
 }
-
 pub fn feed_log_to_dto(f: FeedLog) -> FeedLogDto {
     FeedLogDto {
         id: f.id.to_string(),
@@ -54,7 +50,6 @@ pub fn feed_log_to_dto(f: FeedLog) -> FeedLogDto {
         logged_at_millis: f.logged_at.timestamp_millis(),
     }
 }
-
 pub fn sleep_log_to_dto(s: SleepLog) -> SleepLogDto {
     let duration_minutes = (s.end_time - s.start_time).num_minutes();
     SleepLogDto {
@@ -65,7 +60,6 @@ pub fn sleep_log_to_dto(s: SleepLog) -> SleepLogDto {
         duration_minutes,
     }
 }
-
 pub fn diaper_log_to_dto(d: DiaperLog) -> DiaperLogDto {
     DiaperLogDto {
         id: d.id.to_string(),

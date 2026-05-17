@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.history
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -15,17 +14,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
-
 @Composable
 fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     var rangeDays by remember { mutableIntStateOf(7) }
     LaunchedEffect(rangeDays) { viewModel.loadRange(rangeDays) }
-
     Column(modifier = Modifier.fillMaxSize()) {
         HistoryHeader(rangeDays = rangeDays, onRangeChange = { rangeDays = it })
         HorizontalDivider()
-
         when {
             state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Teal500)
@@ -40,7 +36,6 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
         }
     }
 }
-
 @Composable
 private fun HistoryHeader(rangeDays: Int, onRangeChange: (Int) -> Unit) {
     val options = listOf(1 to "Today", 7 to "7 days", 30 to "30 days")
@@ -59,7 +54,6 @@ private fun HistoryHeader(rangeDays: Int, onRangeChange: (Int) -> Unit) {
         }
     }
 }
-
 @Composable
 private fun EmptyState() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

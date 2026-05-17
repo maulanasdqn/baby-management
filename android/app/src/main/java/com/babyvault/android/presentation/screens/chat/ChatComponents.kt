@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.chat
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,7 +12,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.babyvault.android.presentation.theme.*
-
 @Composable
 internal fun ChatBubble(message: ChatMessage) {
     val isUser = message.sender == Sender.User
@@ -51,7 +49,6 @@ internal fun ChatBubble(message: ChatMessage) {
         }
     }
 }
-
 @Composable
 internal fun TypingIndicator() {
     Row(
@@ -77,7 +74,6 @@ internal fun TypingIndicator() {
         }
     }
 }
-
 @Composable
 internal fun ChatHeader() {
     Column(

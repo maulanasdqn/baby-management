@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.unlock
-
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,7 +20,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.Teal400
 import com.babyvault.android.presentation.theme.Teal600
-
 @Composable
 fun UnlockScreen(
     onUnlocked: () -> Unit,
@@ -30,7 +28,6 @@ fun UnlockScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-
     LaunchedEffect(state) {
         when (state) {
             is UnlockState.Unlocked -> onUnlocked()
@@ -38,7 +35,6 @@ fun UnlockScreen(
             else -> Unit
         }
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -65,7 +61,6 @@ fun UnlockScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White.copy(alpha = 0.8f),
             )
-
             if (state is UnlockState.Error) {
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
@@ -79,7 +74,6 @@ fun UnlockScreen(
                     )
                 }
             }
-
             Button(
                 onClick = {
                     val activity = context as FragmentActivity

@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.home
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -24,11 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
 import com.babyvault.android.presentation.utils.formatSleepMinutes
-
 @Composable
 fun HomeScreen(onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,7 +33,6 @@ fun HomeScreen(onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltView
             .verticalScroll(rememberScrollState()),
     ) {
         HomeHeader(name = state.babyName, ageLabel = state.babyAgeLabel, onSettings = { onNavigate("settings") })
-
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -45,7 +41,6 @@ fun HomeScreen(onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltView
             TodayStatCard(Icons.Filled.Bedtime, SkyBlue100, SkyBlue400, formatSleepMinutes(state.todaySleepMinutes), "Sleep", Modifier.weight(1f))
             TodayStatCard(Icons.Filled.ChildCare, Sage100, Sage400, "${state.todayDiapers}", "Diapers", Modifier.weight(1f))
         }
-
         Text(
             "Quick Log",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -65,16 +60,13 @@ fun HomeScreen(onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltView
             CategoryCard(Icons.AutoMirrored.Filled.ShowChart,  "Growth",    Lavender100, Lavender400) { onNavigate("log_growth") }
             CategoryCard(Icons.Filled.PhotoCamera,             "Media",     Indigo100,   Indigo400)   { onNavigate("media") }
         }
-
         if (state.milestones.isNotEmpty()) {
             Spacer(Modifier.height(24.dp))
             MilestoneSection(milestones = state.milestones.take(3))
         }
-
         Spacer(Modifier.height(20.dp))
     }
 }
-
 @Composable
 private fun HomeHeader(name: String, ageLabel: String, onSettings: () -> Unit) {
     Box(
@@ -107,7 +99,6 @@ private fun HomeHeader(name: String, ageLabel: String, onSettings: () -> Unit) {
         }
     }
 }
-
 @Composable
 private fun MilestoneSection(milestones: List<com.babyvault.android.domain.model.Milestone>) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {

@@ -4,18 +4,15 @@ use crate::infrastructure::repository::sqlite_pool::Pool;
 use chrono::{DateTime, TimeZone, Utc};
 use config::error_db::RepositoryError;
 use uuid::Uuid;
-
 #[derive(Clone)]
 pub struct SqliteDiaperRepository {
     pool: Pool,
 }
-
 impl SqliteDiaperRepository {
     pub fn new(pool: Pool) -> Self {
         Self { pool }
     }
 }
-
 impl DiaperRepository for SqliteDiaperRepository {
     fn find_by_id(&self, id: Uuid) -> Result<Option<DiaperLog>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
@@ -26,7 +23,6 @@ impl DiaperRepository for SqliteDiaperRepository {
             .optional()
             .map_err(|e| RepositoryError::Database(e.to_string()))
     }
-
     fn list_by_range(&self, from: DateTime<Utc>, to: DateTime<Utc>) -> Result<Vec<DiaperLog>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         let mut stmt = conn
@@ -38,7 +34,6 @@ impl DiaperRepository for SqliteDiaperRepository {
         rows.collect::<Result<Vec<_>, _>>()
             .map_err(|e| RepositoryError::Database(e.to_string()))
     }
-
     fn create(&self, d: NewDiaperLog) -> Result<DiaperLog, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         conn.execute(
@@ -58,7 +53,6 @@ impl DiaperRepository for SqliteDiaperRepository {
             logged_at: d.logged_at,
         })
     }
-
     fn delete(&self, id: Uuid) -> Result<(), RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         conn.execute("DELETE FROM diaper_logs WHERE id = ?1", [id.to_string()])
@@ -66,7 +60,6 @@ impl DiaperRepository for SqliteDiaperRepository {
         Ok(())
     }
 }
-
 fn row_to_diaper_log(row: &rusqlite::Row) -> rusqlite::Result<DiaperLog> {
     let id_str: String = row.get(0)?;
     let type_str: String = row.get(1)?;
@@ -78,11 +71,9 @@ fn row_to_diaper_log(row: &rusqlite::Row) -> rusqlite::Result<DiaperLog> {
         logged_at: Utc.timestamp_millis_opt(logged_ms).single().unwrap_or_default(),
     })
 }
-
 trait OptionalExt<T> {
     fn optional(self) -> rusqlite::Result<Option<T>>;
 }
-
 impl<T> OptionalExt<T> for rusqlite::Result<T> {
     fn optional(self) -> rusqlite::Result<Option<T>> {
         match self {

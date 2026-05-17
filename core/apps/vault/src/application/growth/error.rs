@@ -1,13 +1,11 @@
 use config::error_db::RepositoryError;
 use std::fmt;
-
 #[derive(Debug)]
 pub enum GrowthError {
     NotFound,
     NoMeasurementProvided,
     Internal(String),
 }
-
 impl fmt::Display for GrowthError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -19,9 +17,7 @@ impl fmt::Display for GrowthError {
         }
     }
 }
-
 impl std::error::Error for GrowthError {}
-
 impl From<RepositoryError> for GrowthError {
     fn from(e: RepositoryError) -> Self {
         match e {

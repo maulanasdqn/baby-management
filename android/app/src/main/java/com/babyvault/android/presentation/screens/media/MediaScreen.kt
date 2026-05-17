@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.media
-
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,24 +41,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.domain.model.MediaItem
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
 private val DATE_FMT = DateTimeFormatter.ofPattern("MMM d").withZone(ZoneId.systemDefault())
-
 @Composable
 fun MediaScreen(viewModel: MediaViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
     var showTitleDialog by remember { mutableStateOf(false) }
-
     val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             pendingUri = uri
             showTitleDialog = true
         }
     }
-
     if (showTitleDialog && pendingUri != null) {
         TitleInputDialog(
             onDismiss = {
@@ -75,7 +69,6 @@ fun MediaScreen(viewModel: MediaViewModel = hiltViewModel()) {
             },
         )
     }
-
     Column(modifier = Modifier.fillMaxSize()) {
         Button(
             onClick = { photoPicker.launch(androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
@@ -88,7 +81,6 @@ fun MediaScreen(viewModel: MediaViewModel = hiltViewModel()) {
             }
             Text(if (state.isUploading) "Encrypting…" else "Add Photo / Video")
         }
-
         state.error?.let {
             Text(
                 it,
@@ -98,7 +90,6 @@ fun MediaScreen(viewModel: MediaViewModel = hiltViewModel()) {
             )
             Spacer(Modifier.height(8.dp))
         }
-
         when {
             state.isLoading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -124,7 +115,6 @@ fun MediaScreen(viewModel: MediaViewModel = hiltViewModel()) {
         }
     }
 }
-
 @Composable
 private fun MediaItemCard(item: MediaItem) {
     Card(modifier = Modifier.fillMaxWidth().height(120.dp)) {
@@ -144,7 +134,6 @@ private fun MediaItemCard(item: MediaItem) {
         }
     }
 }
-
 @Composable
 private fun TitleInputDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var title by remember { mutableStateOf("") }
@@ -170,7 +159,6 @@ private fun TitleInputDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit)
         },
     )
 }
-
 private fun formatBytes(bytes: Long): String = when {
     bytes >= 1_048_576 -> "%.1f MB".format(bytes / 1_048_576.0)
     bytes >= 1_024 -> "%.1f KB".format(bytes / 1_024.0)

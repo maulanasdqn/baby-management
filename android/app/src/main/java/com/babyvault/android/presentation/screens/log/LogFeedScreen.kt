@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.log
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,18 +17,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.domain.model.FeedType
 import com.babyvault.android.presentation.theme.*
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogFeedScreen(onBack: () -> Unit, viewModel: LogFeedViewModel = hiltViewModel()) {
     LaunchedEffect(Unit) { viewModel.saved.collect { onBack() } }
-
     var feedType by remember { mutableStateOf(FeedType.BREAST) }
     var amountMl by remember { mutableStateOf("") }
     var durationMin by remember { mutableStateOf("") }
     var side by remember { mutableStateOf("Left") }
     var notes by remember { mutableStateOf("") }
-
     Scaffold(
         containerColor = NeutralGray,
         topBar = {
@@ -60,7 +56,6 @@ fun LogFeedScreen(onBack: () -> Unit, viewModel: LogFeedViewModel = hiltViewMode
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            // Icon header
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -92,8 +87,6 @@ fun LogFeedScreen(onBack: () -> Unit, viewModel: LogFeedViewModel = hiltViewMode
                     )
                 }
             }
-
-            // Feed type chips
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     "Type",
@@ -110,8 +103,6 @@ fun LogFeedScreen(onBack: () -> Unit, viewModel: LogFeedViewModel = hiltViewMode
                     }
                 }
             }
-
-            // Bottle: amount field
             if (feedType == FeedType.BOTTLE) {
                 OutlinedTextField(
                     value = amountMl,
@@ -123,8 +114,6 @@ fun LogFeedScreen(onBack: () -> Unit, viewModel: LogFeedViewModel = hiltViewMode
                     singleLine = true,
                 )
             }
-
-            // Breast: duration + side chips
             if (feedType == FeedType.BREAST) {
                 OutlinedTextField(
                     value = durationMin,
@@ -152,7 +141,6 @@ fun LogFeedScreen(onBack: () -> Unit, viewModel: LogFeedViewModel = hiltViewMode
                     }
                 }
             }
-
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
@@ -161,7 +149,6 @@ fun LogFeedScreen(onBack: () -> Unit, viewModel: LogFeedViewModel = hiltViewMode
                 shape = RoundedCornerShape(14.dp),
                 minLines = 2,
             )
-
             Button(
                 onClick = {
                     viewModel.save(
@@ -183,7 +170,6 @@ fun LogFeedScreen(onBack: () -> Unit, viewModel: LogFeedViewModel = hiltViewMode
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
-
             Spacer(Modifier.height(8.dp))
         }
     }

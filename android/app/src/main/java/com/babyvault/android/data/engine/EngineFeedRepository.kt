@@ -1,5 +1,4 @@
 package com.babyvault.android.data.engine
-
 import com.babyvault.android.core.vault.VaultEngineProvider
 import com.babyvault.android.domain.model.FeedLog
 import com.babyvault.android.domain.model.FeedType
@@ -9,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
-
 class EngineFeedRepository @Inject constructor(
     private val provider: VaultEngineProvider,
 ) : FeedRepository {
@@ -27,22 +25,18 @@ class EngineFeedRepository @Inject constructor(
                 dto.toDomain()
             }
         }
-
     override suspend fun listByRange(fromMillis: Long, toMillis: Long): Result<List<FeedLog>> =
         withContext(Dispatchers.IO) {
             runCatching { provider.engine.listFeedByRange(fromMillis, toMillis).map { it.toDomain() } }
         }
-
     override suspend fun delete(id: String): Result<Unit> =
         withContext(Dispatchers.IO) { runCatching { provider.engine.deleteFeed(id) } }
 }
-
 private fun FeedType.toDto() = when (this) {
     FeedType.BREAST -> FeedTypeDto.BREAST
     FeedType.BOTTLE -> FeedTypeDto.BOTTLE
     FeedType.SOLID -> FeedTypeDto.SOLID
 }
-
 private fun com.babyvault.core.FeedLogDto.toDomain() = FeedLog(
     id = id,
     feedType = when (feedType) {

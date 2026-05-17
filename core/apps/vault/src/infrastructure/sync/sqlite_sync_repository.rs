@@ -4,18 +4,15 @@ use crate::domain::sync::entity::{
 use crate::domain::sync::repository::SyncRepository;
 use crate::infrastructure::repository::sqlite_pool::Pool;
 use config::error_db::RepositoryError;
-
 #[derive(Clone)]
 pub struct SqliteSyncRepository {
     pool: Pool,
 }
-
 impl SqliteSyncRepository {
     pub fn new(pool: Pool) -> Self {
         Self { pool }
     }
 }
-
 impl SyncRepository for SqliteSyncRepository {
     fn get_pending_milestones(&self) -> Result<Vec<SyncMilestoneRecord>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
@@ -25,7 +22,6 @@ impl SyncRepository for SqliteSyncRepository {
                  WHERE id NOT IN (SELECT entity_id FROM sync_state WHERE entity_type = 'milestone')",
             )
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
-
         let rows = stmt
             .query_map([], |row| {
                 Ok(SyncMilestoneRecord {
@@ -39,10 +35,8 @@ impl SyncRepository for SqliteSyncRepository {
             .map_err(|e| RepositoryError::Database(e.to_string()))?
             .collect::<Result<Vec<_>, _>>()
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
-
         Ok(rows)
     }
-
     fn get_pending_growth_logs(&self) -> Result<Vec<SyncGrowthRecord>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         let mut stmt = conn
@@ -51,7 +45,6 @@ impl SyncRepository for SqliteSyncRepository {
                  WHERE id NOT IN (SELECT entity_id FROM sync_state WHERE entity_type = 'growth_log')",
             )
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
-
         let rows = stmt
             .query_map([], |row| {
                 Ok(SyncGrowthRecord {
@@ -65,10 +58,8 @@ impl SyncRepository for SqliteSyncRepository {
             .map_err(|e| RepositoryError::Database(e.to_string()))?
             .collect::<Result<Vec<_>, _>>()
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
-
         Ok(rows)
     }
-
     fn get_pending_media_metadata(&self) -> Result<Vec<SyncMediaRecord>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         let mut stmt = conn
@@ -77,7 +68,6 @@ impl SyncRepository for SqliteSyncRepository {
                  WHERE id NOT IN (SELECT entity_id FROM sync_state WHERE entity_type = 'media')",
             )
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
-
         let rows = stmt
             .query_map([], |row| {
                 Ok(SyncMediaRecord {
@@ -90,10 +80,8 @@ impl SyncRepository for SqliteSyncRepository {
             .map_err(|e| RepositoryError::Database(e.to_string()))?
             .collect::<Result<Vec<_>, _>>()
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
-
         Ok(rows)
     }
-
     fn get_pending_media_files(&self) -> Result<Vec<PendingMediaFile>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         let mut stmt = conn
@@ -102,7 +90,6 @@ impl SyncRepository for SqliteSyncRepository {
                  WHERE id NOT IN (SELECT entity_id FROM sync_state WHERE entity_type = 'media')",
             )
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
-
         let rows = stmt
             .query_map([], |row| {
                 Ok(PendingMediaFile { id: row.get(0)?, encrypted_path: row.get(1)? })
@@ -110,10 +97,8 @@ impl SyncRepository for SqliteSyncRepository {
             .map_err(|e| RepositoryError::Database(e.to_string()))?
             .collect::<Result<Vec<_>, _>>()
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
-
         Ok(rows)
     }
-
     fn mark_synced(&self, entity_type: &str, ids: &[String], synced_at_millis: i64) -> Result<(), RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         for id in ids {
@@ -125,7 +110,6 @@ impl SyncRepository for SqliteSyncRepository {
         }
         Ok(())
     }
-
     fn get_last_synced_at(&self) -> Result<Option<i64>, RepositoryError> {
         let conn = self.pool.lock().map_err(|e| RepositoryError::Database(e.to_string()))?;
         let result: Option<i64> = conn
@@ -133,7 +117,6 @@ impl SyncRepository for SqliteSyncRepository {
             .map_err(|e| RepositoryError::Database(e.to_string()))?;
         Ok(result)
     }
-
     fn get_status(&self) -> Result<SyncStatus, RepositoryError> {
         let pending_milestones = self.get_pending_milestones()?.len() as u32;
         let pending_growth_logs = self.get_pending_growth_logs()?.len() as u32;

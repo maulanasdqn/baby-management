@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.growth
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babyvault.android.domain.model.GrowthLog
@@ -12,26 +11,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
 import javax.inject.Inject
-
 data class GrowthUiState(
     val logs: List<GrowthLog> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null,
 )
-
 @HiltViewModel
 class GrowthViewModel @Inject constructor(
     private val logGrowth: LogGrowthUseCase,
     private val listByRange: ListGrowthByRangeUseCase,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(GrowthUiState())
     val state: StateFlow<GrowthUiState> = _state.asStateFlow()
-
     init {
         load()
     }
-
     fun load() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -45,7 +39,6 @@ class GrowthViewModel @Inject constructor(
                 .onFailure { _state.value = GrowthUiState(isLoading = false, error = it.message) }
         }
     }
-
     fun log(weightGramsStr: String, heightMmStr: String, notes: String) {
         val weightGrams = weightGramsStr.trimEnd().toIntOrNull()
         val heightMm = heightMmStr.trimEnd().toIntOrNull()

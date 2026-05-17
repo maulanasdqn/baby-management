@@ -1,7 +1,6 @@
 use burn::prelude::*;
 use burn::nn::{Embedding, EmbeddingConfig};
 use super::{config::GemmaConfig, layer::GemmaLayer, rms_norm::RmsNorm};
-
 #[derive(Module, Debug)]
 pub struct GemmaModel<B: Backend> {
     embed: Embedding<B>,
@@ -9,7 +8,6 @@ pub struct GemmaModel<B: Backend> {
     norm: RmsNorm<B>,
     hidden_size: usize,
 }
-
 impl<B: Backend> GemmaModel<B> {
     pub fn new(cfg: &GemmaConfig, device: &B::Device) -> Self {
         let embed = Embedding::new(
@@ -22,8 +20,6 @@ impl<B: Backend> GemmaModel<B> {
         let norm = RmsNorm::new(cfg.hidden_size, cfg.rms_norm_eps, device);
         Self { embed, layers, norm, hidden_size: cfg.hidden_size }
     }
-
-    /// Returns logits [batch, seq, vocab_size].
     pub fn forward(&self, token_ids: Tensor<B, 2, Int>, offset: usize) -> Tensor<B, 3> {
         let scale = (self.hidden_size as f32).sqrt();
         let mut x = self.embed.forward(token_ids).mul_scalar(scale);
@@ -31,7 +27,6 @@ impl<B: Backend> GemmaModel<B> {
             x = layer.forward(x, offset);
         }
         let x = self.norm.forward(x);
-        // Tie weights: logits = x @ embed.weight^T
         let w = self.embed.weight.val();
         let [v, d] = w.dims();
         let [b, s, _] = x.dims();

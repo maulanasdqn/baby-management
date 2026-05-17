@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.splash
-
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.byteArrayPreferencesKey
@@ -16,16 +15,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 sealed interface SplashState {
     data object Loading : SplashState
     data object Ready : SplashState
     data object NeedUnlock : SplashState
     data object NeedProfile : SplashState
 }
-
 private val WRAPPED_KEY = byteArrayPreferencesKey("wrapped_master_key")
-
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val generateMasterKey: GenerateMasterKeyUseCase,
@@ -34,20 +30,15 @@ class SplashViewModel @Inject constructor(
     private val dataStore: DataStore<Preferences>,
     private val profileStore: BabyProfileStore,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow<SplashState>(SplashState.Loading)
     val state: StateFlow<SplashState> = _state.asStateFlow()
-
     init {
         viewModelScope.launch { initialize() }
     }
-
     private suspend fun initialize() {
         val prefs = dataStore.data.first()
         val wrapped = prefs[WRAPPED_KEY]
-
         if (wrapped == null) {
-            // First launch — generate and persist key, then unlock immediately.
             val rawKey = generateMasterKey().getOrElse {
                 _state.value = SplashState.NeedUnlock
                 return
@@ -58,7 +49,6 @@ class SplashViewModel @Inject constructor(
             val profile = profileStore.profile.first()
             _state.value = if (profile == null) SplashState.NeedProfile else SplashState.Ready
         } else {
-            // Subsequent launch — biometric prompt needed; route to UnlockScreen.
             _state.value = SplashState.NeedUnlock
         }
     }

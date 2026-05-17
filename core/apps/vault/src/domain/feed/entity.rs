@@ -1,12 +1,10 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-
 pub enum FeedType {
     Breast,
     Bottle,
     Solid,
 }
-
 impl FeedType {
     pub fn as_str(&self) -> &'static str {
         match self {
@@ -15,7 +13,6 @@ impl FeedType {
             Self::Solid => "Solid",
         }
     }
-
     pub fn from_str(s: &str) -> Option<Self> {
         match s {
             "Breast" => Some(Self::Breast),
@@ -25,7 +22,6 @@ impl FeedType {
         }
     }
 }
-
 pub struct FeedLog {
     pub id: Uuid,
     pub feed_type: FeedType,
@@ -35,7 +31,6 @@ pub struct FeedLog {
     pub notes: String,
     pub logged_at: DateTime<Utc>,
 }
-
 pub struct NewFeedLog {
     pub id: Uuid,
     pub feed_type: FeedType,

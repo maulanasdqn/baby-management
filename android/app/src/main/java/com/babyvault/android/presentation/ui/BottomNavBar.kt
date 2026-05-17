@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.ui
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.ChildFriendly
@@ -13,7 +12,6 @@ import com.babyvault.android.presentation.theme.CardSurface
 import com.babyvault.android.presentation.theme.Teal100
 import com.babyvault.android.presentation.theme.Teal600
 import com.babyvault.android.presentation.theme.TextSecondary
-
 sealed class BottomTab(val route: String, val label: String) {
     object Home : BottomTab("home", "Home")
     object History : BottomTab("history", "History")
@@ -21,7 +19,6 @@ sealed class BottomTab(val route: String, val label: String) {
     object Chat : BottomTab("chat", "AI")
     object Settings : BottomTab("settings", "Settings")
 }
-
 private val navItemColors @Composable get() = NavigationBarItemDefaults.colors(
     selectedIconColor = Teal600,
     selectedTextColor = Teal600,
@@ -29,7 +26,6 @@ private val navItemColors @Composable get() = NavigationBarItemDefaults.colors(
     unselectedIconColor = TextSecondary,
     unselectedTextColor = TextSecondary,
 )
-
 @Composable
 fun BottomNavBar(currentRoute: String, onNavigate: (String) -> Unit) {
     NavigationBar(

@@ -4,22 +4,18 @@ use crate::domain::milestone::repository::MilestoneRepository;
 use chrono::{DateTime, Utc};
 use tracing::info;
 use uuid::Uuid;
-
 pub struct CreateMilestoneCommand {
     pub title: String,
     pub description: String,
     pub occurred_at: DateTime<Utc>,
 }
-
 pub struct CreateMilestoneUseCase<R> {
     repository: R,
 }
-
 impl<R: MilestoneRepository> CreateMilestoneUseCase<R> {
     pub fn new(repository: R) -> Self {
         Self { repository }
     }
-
     pub fn execute(&self, cmd: CreateMilestoneCommand) -> Result<Milestone, MilestoneError> {
         if cmd.title.trim().is_empty() {
             return Err(MilestoneError::InvalidTitle);
@@ -27,7 +23,6 @@ impl<R: MilestoneRepository> CreateMilestoneUseCase<R> {
         if cmd.occurred_at > Utc::now() {
             return Err(MilestoneError::InvalidOccurredAt);
         }
-
         let id = Uuid::new_v4();
         let milestone = self
             .repository
@@ -38,12 +33,10 @@ impl<R: MilestoneRepository> CreateMilestoneUseCase<R> {
                 occurred_at: cmd.occurred_at,
             })
             .map_err(MilestoneError::from)?;
-
         info!(milestone_id = %milestone.id, "milestone created");
         Ok(milestone)
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -51,9 +44,7 @@ mod tests {
     use crate::domain::milestone::repository::MilestoneRepository;
     use config::error_db::RepositoryError;
     use std::sync::Mutex;
-
     struct FakeRepo(Mutex<Vec<Milestone>>);
-
     impl MilestoneRepository for FakeRepo {
         fn find_by_id(&self, id: Uuid) -> Result<Option<Milestone>, RepositoryError> {
             Ok(self.0.lock().unwrap().iter().find(|m| m.id == id).map(|m| Milestone {
@@ -91,7 +82,6 @@ mod tests {
             Ok(())
         }
     }
-
     #[test]
     fn create_valid_milestone() {
         let repo = FakeRepo(Mutex::new(vec![]));
@@ -104,7 +94,6 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(result.unwrap().title, "First Steps");
     }
-
     #[test]
     fn create_milestone_empty_title_is_rejected() {
         let repo = FakeRepo(Mutex::new(vec![]));
@@ -116,7 +105,6 @@ mod tests {
         });
         assert!(matches!(result, Err(MilestoneError::InvalidTitle)));
     }
-
     #[test]
     fn create_milestone_future_occurred_at_is_rejected() {
         let repo = FakeRepo(Mutex::new(vec![]));
@@ -128,7 +116,6 @@ mod tests {
         });
         assert!(matches!(result, Err(MilestoneError::InvalidOccurredAt)));
     }
-
     #[test]
     fn created_milestone_is_stored_in_repo() {
         let repo = FakeRepo(Mutex::new(vec![]));

@@ -1,10 +1,8 @@
 use std::fmt;
-
 #[derive(Debug)]
 pub enum GrowthDomainError {
     NoMeasurementProvided,
 }
-
 impl fmt::Display for GrowthDomainError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -14,5 +12,4 @@ impl fmt::Display for GrowthDomainError {
         }
     }
 }
-
 impl std::error::Error for GrowthDomainError {}

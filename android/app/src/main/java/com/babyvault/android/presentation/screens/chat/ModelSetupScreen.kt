@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.chat
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -24,7 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelSetupScreen(
@@ -33,11 +31,9 @@ fun ModelSetupScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var tokenVisible by remember { mutableStateOf(false) }
-
     LaunchedEffect(state.isReady) {
         if (state.isReady) onBack()
     }
-
     Scaffold(
         containerColor = NeutralGray,
         topBar = {
@@ -68,13 +64,11 @@ fun ModelSetupScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Spacer(Modifier.height(16.dp))
-
             Surface(shape = CircleShape, color = Teal100, modifier = Modifier.size(80.dp)) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(Icons.Default.CloudDownload, null, tint = Teal600, modifier = Modifier.size(40.dp))
                 }
             }
-
             Text(
                 "Gemma 3 1B",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
@@ -86,8 +80,6 @@ fun ModelSetupScreen(
                 color = TextSecondary,
                 textAlign = TextAlign.Center,
             )
-
-            // HuggingFace token field
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Icon(Icons.Default.Key, null, tint = Teal600, modifier = Modifier.size(16.dp))
@@ -126,8 +118,6 @@ fun ModelSetupScreen(
                     color = TextSecondary,
                 )
             }
-
-            // Progress / error / action
             when {
                 state.isDownloading -> {
                     Column(
@@ -178,14 +168,12 @@ fun ModelSetupScreen(
                     ) { Text("Download Model") }
                 }
             }
-
             Text(
                 "Wi-Fi recommended. Stored in app-private storage, never shared.",
                 style = MaterialTheme.typography.labelSmall,
                 color = TextSecondary,
                 textAlign = TextAlign.Center,
             )
-
             Spacer(Modifier.height(8.dp))
         }
     }

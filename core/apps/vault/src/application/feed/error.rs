@@ -1,13 +1,11 @@
 use config::error_db::RepositoryError;
 use std::fmt;
-
 #[derive(Debug)]
 pub enum FeedError {
     NotFound,
     InvalidFeedType,
     Internal(String),
 }
-
 impl fmt::Display for FeedError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -17,9 +15,7 @@ impl fmt::Display for FeedError {
         }
     }
 }
-
 impl std::error::Error for FeedError {}
-
 impl From<RepositoryError> for FeedError {
     fn from(e: RepositoryError) -> Self {
         match e {

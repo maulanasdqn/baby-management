@@ -2,14 +2,12 @@ use burn::prelude::*;
 use burn::nn::Linear;
 use burn::tensor::activation::gelu;
 use super::config::GemmaConfig;
-
 #[derive(Module, Debug)]
 pub struct GemmaMlp<B: Backend> {
     gate_proj: Linear<B>,
     up_proj: Linear<B>,
     down_proj: Linear<B>,
 }
-
 impl<B: Backend> GemmaMlp<B> {
     pub fn new(cfg: &GemmaConfig, device: &B::Device) -> Self {
         let h = cfg.hidden_size;
@@ -21,7 +19,6 @@ impl<B: Backend> GemmaMlp<B> {
             down_proj: Linear::new(&no_bias(i, h), device),
         }
     }
-
     pub fn forward(&self, x: Tensor<B, 3>) -> Tensor<B, 3> {
         let gate = gelu(self.gate_proj.forward(x.clone()));
         let up = self.up_proj.forward(x);

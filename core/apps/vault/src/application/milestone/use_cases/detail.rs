@@ -2,23 +2,19 @@ use crate::application::milestone::error::MilestoneError;
 use crate::domain::milestone::entity::Milestone;
 use crate::domain::milestone::repository::MilestoneRepository;
 use uuid::Uuid;
-
 pub struct DetailMilestoneUseCase<R> {
     repository: R,
 }
-
 impl<R: MilestoneRepository> DetailMilestoneUseCase<R> {
     pub fn new(repository: R) -> Self {
         Self { repository }
     }
-
     pub fn execute(&self, id: Uuid) -> Result<Milestone, MilestoneError> {
         self.repository
             .find_by_id(id)?
             .ok_or(MilestoneError::NotFound)
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -27,9 +23,7 @@ mod tests {
     use chrono::Utc;
     use config::error_db::RepositoryError;
     use std::sync::Mutex;
-
     struct FakeRepo(Mutex<Vec<Milestone>>);
-
     impl MilestoneRepository for FakeRepo {
         fn find_by_id(&self, id: Uuid) -> Result<Option<Milestone>, RepositoryError> {
             Ok(self.0.lock().unwrap().iter().find(|m| m.id == id).map(|m| Milestone {
@@ -51,7 +45,6 @@ mod tests {
             Ok(())
         }
     }
-
     #[test]
     fn get_existing_milestone_returns_it() {
         let id = Uuid::new_v4();
@@ -67,7 +60,6 @@ mod tests {
         assert_eq!(result.id, id);
         assert_eq!(result.title, "Crawling");
     }
-
     #[test]
     fn get_nonexistent_milestone_returns_not_found() {
         let repo = FakeRepo(Mutex::new(vec![]));

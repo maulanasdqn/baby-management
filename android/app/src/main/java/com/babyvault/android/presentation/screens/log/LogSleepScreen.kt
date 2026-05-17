@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.log
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,16 +16,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.babyvault.android.presentation.theme.*
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogSleepScreen(onBack: () -> Unit, viewModel: LogSleepViewModel = hiltViewModel()) {
     LaunchedEffect(Unit) { viewModel.saved.collect { onBack() } }
-
     var durationHours by remember { mutableStateOf("") }
     var durationMins by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
-
     Scaffold(
         containerColor = NeutralGray,
         topBar = {
@@ -57,7 +53,6 @@ fun LogSleepScreen(onBack: () -> Unit, viewModel: LogSleepViewModel = hiltViewMo
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            // Icon header
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -89,8 +84,6 @@ fun LogSleepScreen(onBack: () -> Unit, viewModel: LogSleepViewModel = hiltViewMo
                     )
                 }
             }
-
-            // Duration row
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     "Duration",
@@ -118,7 +111,6 @@ fun LogSleepScreen(onBack: () -> Unit, viewModel: LogSleepViewModel = hiltViewMo
                     )
                 }
             }
-
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
@@ -127,7 +119,6 @@ fun LogSleepScreen(onBack: () -> Unit, viewModel: LogSleepViewModel = hiltViewMo
                 shape = RoundedCornerShape(14.dp),
                 minLines = 2,
             )
-
             Button(
                 onClick = {
                     val totalMins = ((durationHours.toIntOrNull() ?: 0) * 60) + (durationMins.toIntOrNull() ?: 0)
@@ -146,7 +137,6 @@ fun LogSleepScreen(onBack: () -> Unit, viewModel: LogSleepViewModel = hiltViewMo
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
-
             Spacer(Modifier.height(8.dp))
         }
     }

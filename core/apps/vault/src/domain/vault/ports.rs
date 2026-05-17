@@ -1,5 +1,4 @@
 use crate::domain::vault::errors::CryptoError;
-
 pub trait CryptoEngine: Send + Sync {
     fn encrypt_bytes(&self, plaintext: &[u8], key: &[u8]) -> Result<Vec<u8>, CryptoError>;
     fn decrypt_bytes(&self, ciphertext: &[u8], key: &[u8]) -> Result<Vec<u8>, CryptoError>;
@@ -11,7 +10,6 @@ pub trait CryptoEngine: Send + Sync {
     ) -> Result<(), CryptoError>;
     fn decrypt_from_file(&self, src_path: &str, key: &[u8]) -> Result<Vec<u8>, CryptoError>;
 }
-
 impl<T: CryptoEngine + ?Sized> CryptoEngine for &T {
     fn encrypt_bytes(&self, plaintext: &[u8], key: &[u8]) -> Result<Vec<u8>, CryptoError> {
         (**self).encrypt_bytes(plaintext, key)

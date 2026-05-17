@@ -1,5 +1,4 @@
 package com.babyvault.android.presentation.screens.timeline
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babyvault.android.domain.model.Milestone
@@ -13,27 +12,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
 import javax.inject.Inject
-
 data class TimelineUiState(
     val milestones: List<Milestone> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null,
 )
-
 @HiltViewModel
 class TimelineViewModel @Inject constructor(
     private val listMilestones: ListMilestonesUseCase,
     private val createMilestone: CreateMilestoneUseCase,
     private val deleteMilestone: DeleteMilestoneUseCase,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(TimelineUiState())
     val state: StateFlow<TimelineUiState> = _state.asStateFlow()
-
     init {
         load()
     }
-
     fun load() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -42,7 +36,6 @@ class TimelineViewModel @Inject constructor(
                 .onFailure { _state.value = TimelineUiState(isLoading = false, error = it.message) }
         }
     }
-
     fun create(title: String, description: String) {
         if (title.isBlank()) return
         viewModelScope.launch {
@@ -51,7 +44,6 @@ class TimelineViewModel @Inject constructor(
                 .onFailure { _state.value = _state.value.copy(error = it.message) }
         }
     }
-
     fun delete(id: String) {
         viewModelScope.launch {
             deleteMilestone(id)

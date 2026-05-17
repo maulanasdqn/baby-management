@@ -1,6 +1,5 @@
 use config::error_db::RepositoryError;
 use std::fmt;
-
 #[derive(Debug)]
 pub enum SyncError {
     NotConfigured,
@@ -8,7 +7,6 @@ pub enum SyncError {
     ServerRejected(String),
     Internal(String),
 }
-
 impl fmt::Display for SyncError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -19,9 +17,7 @@ impl fmt::Display for SyncError {
         }
     }
 }
-
 impl std::error::Error for SyncError {}
-
 impl From<RepositoryError> for SyncError {
     fn from(e: RepositoryError) -> Self {
         Self::Internal(e.to_string())
