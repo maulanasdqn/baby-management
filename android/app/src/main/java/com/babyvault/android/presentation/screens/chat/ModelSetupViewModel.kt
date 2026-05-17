@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 data class ModelSetupState(
-    val hfToken: String = "",
+    val hfToken: String = com.babyvault.android.BuildConfig.HF_TOKEN,
     val isDownloading: Boolean = false,
     val progress: Float = 0f,
     val statusText: String = "",
