@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.byteArrayPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.babyvault.android.data.local.BabyProfileStore
 import com.babyvault.android.data.local.KeystoreMasterKeyStore
 import com.babyvault.android.domain.usecase.UnlockVaultUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ sealed interface UnlockState {
     data object Idle : UnlockState
     data object Unlocking : UnlockState
     data object Unlocked : UnlockState
+    data object NeedProfile : UnlockState
     data class Error(val message: String) : UnlockState
 }
 
@@ -29,6 +31,7 @@ class UnlockViewModel @Inject constructor(
     private val unlockVault: UnlockVaultUseCase,
     private val keystoreStore: KeystoreMasterKeyStore,
     private val dataStore: DataStore<Preferences>,
+    private val profileStore: BabyProfileStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<UnlockState>(UnlockState.Idle)
@@ -48,9 +51,16 @@ class UnlockViewModel @Inject constructor(
                 return@launch
             }
             unlockVault(rawKey).fold(
-                onSuccess = { _state.value = UnlockState.Unlocked },
+                onSuccess = {
+                    val profile = profileStore.profile.first()
+                    _state.value = if (profile == null) UnlockState.NeedProfile else UnlockState.Unlocked
+                },
                 onFailure = { _state.value = UnlockState.Error(it.message ?: "Unknown error") },
             )
         }
+    }
+
+    fun onBiometricError(msg: String) {
+        _state.value = UnlockState.Error(msg)
     }
 }

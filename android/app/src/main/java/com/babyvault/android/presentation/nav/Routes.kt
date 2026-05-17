@@ -3,9 +3,10 @@ package com.babyvault.android.presentation.nav
 object Routes {
     const val SPLASH = "splash"
     const val UNLOCK = "unlock"
+    const val PROFILE_SETUP = "profile_setup"
     const val HOME = "home"
-    const val LOG_HUB = "log_hub"
     const val LOG_FEED = "log_feed"
+    const val FEED_TIMER = "feed_timer"
     const val LOG_SLEEP = "log_sleep"
     const val LOG_DIAPER = "log_diaper"
     const val LOG_MILESTONE = "log_milestone"

@@ -1,10 +1,13 @@
 package com.babyvault.android.presentation.nav
 
+import android.app.Activity
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -13,10 +16,12 @@ import com.babyvault.android.presentation.screens.growth.GrowthScreen
 import com.babyvault.android.presentation.screens.history.HistoryScreen
 import com.babyvault.android.presentation.screens.home.HomeScreen
 import com.babyvault.android.presentation.screens.insights.InsightsScreen
+import com.babyvault.android.presentation.screens.log.FeedTimerScreen
 import com.babyvault.android.presentation.screens.log.LogDiaperScreen
 import com.babyvault.android.presentation.screens.log.LogFeedScreen
 import com.babyvault.android.presentation.screens.log.LogSleepScreen
 import com.babyvault.android.presentation.screens.media.MediaScreen
+import com.babyvault.android.presentation.screens.profile.ProfileSetupScreen
 import com.babyvault.android.presentation.screens.settings.SyncSettingsScreen
 import com.babyvault.android.presentation.screens.splash.SplashScreen
 import com.babyvault.android.presentation.screens.timeline.TimelineScreen
@@ -30,13 +35,36 @@ private val bottomNavRoutes = setOf(
     Routes.SETTINGS,
 )
 
+// Routes where status bar icons should be dark (light background screens)
+private val lightStatusBarRoutes = setOf(
+    Routes.HOME,
+    Routes.HISTORY,
+    Routes.INSIGHTS,
+    Routes.SETTINGS,
+    Routes.MEDIA,
+    Routes.LOG_FEED,
+    Routes.LOG_SLEEP,
+    Routes.LOG_DIAPER,
+    Routes.LOG_MILESTONE,
+    Routes.LOG_GROWTH,
+    Routes.FEED_TIMER,
+)
+
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route ?: Routes.HOME
+    val currentRoute = backStackEntry?.destination?.route ?: Routes.SPLASH
+    val view = LocalView.current
+
+    SideEffect {
+        val window = (view.context as Activity).window
+        WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars =
+            currentRoute in lightStatusBarRoutes
+    }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         bottomBar = {
             if (currentRoute in bottomNavRoutes) {
                 BottomNavBar(
@@ -69,6 +97,11 @@ fun AppNavHost() {
                             popUpTo(Routes.SPLASH) { inclusive = true }
                         }
                     },
+                    onNeedProfile = {
+                        navController.navigate(Routes.PROFILE_SETUP) {
+                            popUpTo(Routes.SPLASH) { inclusive = true }
+                        }
+                    },
                 )
             }
             composable(Routes.UNLOCK) {
@@ -76,6 +109,20 @@ fun AppNavHost() {
                     onUnlocked = {
                         navController.navigate(Routes.HOME) {
                             popUpTo(Routes.UNLOCK) { inclusive = true }
+                        }
+                    },
+                    onNeedProfile = {
+                        navController.navigate(Routes.PROFILE_SETUP) {
+                            popUpTo(Routes.UNLOCK) { inclusive = true }
+                        }
+                    },
+                )
+            }
+            composable(Routes.PROFILE_SETUP) {
+                ProfileSetupScreen(
+                    onDone = {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.PROFILE_SETUP) { inclusive = true }
                         }
                     },
                 )
@@ -97,6 +144,9 @@ fun AppNavHost() {
             }
             composable(Routes.LOG_FEED) {
                 LogFeedScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.FEED_TIMER) {
+                FeedTimerScreen(onBack = { navController.popBackStack() })
             }
             composable(Routes.LOG_SLEEP) {
                 LogSleepScreen(onBack = { navController.popBackStack() })
