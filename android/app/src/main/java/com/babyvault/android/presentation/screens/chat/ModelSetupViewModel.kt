@@ -45,6 +45,14 @@ class ModelSetupViewModel @Inject constructor(
         if (present && !ai.isReady()) loadModel()
     }
 
+    fun deleteAndRedownload() {
+        viewModelScope.launch(Dispatchers.IO) {
+            ai.modelDir().listFiles()?.forEach { it.delete() }
+            _state.update { ModelSetupState() }
+            download()
+        }
+    }
+
     fun download() {
         if (_state.value.isDownloading) return
         _state.update { it.copy(isDownloading = true, error = null) }

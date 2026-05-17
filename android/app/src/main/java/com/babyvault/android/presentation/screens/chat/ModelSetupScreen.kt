@@ -79,10 +79,10 @@ fun ModelSetupScreen(
                 state.isLoading -> LoadingModel()
                 state.error != null -> ErrorCard(
                     message = state.error!!,
-                    onRetry = {
-                        if (state.isModelPresent) viewModel.check() else viewModel.download()
-                    },
-                    onBack = onBack,
+                    modelPresent = state.isModelPresent,
+                    onRetry = { viewModel.check() },
+                    onRedownload = { viewModel.deleteAndRedownload() },
+                    onSkip = onBack,
                 )
                 state.isModelPresent -> LoadingModel()
                 else -> DownloadPrompt(onDownload = { viewModel.download() }, onSkip = onBack)
@@ -127,29 +127,60 @@ private fun LoadingModel() {
 }
 
 @Composable
-private fun ErrorCard(message: String, onRetry: () -> Unit, onBack: () -> Unit) {
+private fun ErrorCard(
+    message: String,
+    modelPresent: Boolean,
+    onRetry: () -> Unit,
+    onRedownload: () -> Unit,
+    onSkip: () -> Unit,
+) {
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.errorContainer,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                "Error",
+                "Failed to load model",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )
-            Text(message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onErrorContainer)
+            Text(
+                message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            if (modelPresent) {
+                Text(
+                    "The model file may be corrupt or incomplete. Try deleting and re-downloading.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.75f),
+                )
+            }
         }
     }
-    Button(
-        onClick = onRetry,
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Teal500),
-        modifier = Modifier.fillMaxWidth().height(52.dp),
-    ) { Text("Retry") }
+    if (modelPresent) {
+        Button(
+            onClick = onRedownload,
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Teal500),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
+        ) { Text("Delete & Re-download") }
+        OutlinedButton(
+            onClick = onRetry,
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
+        ) { Text("Retry") }
+    } else {
+        Button(
+            onClick = onRedownload,
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Teal500),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
+        ) { Text("Download Model") }
+    }
     OutlinedButton(
-        onClick = onBack,
+        onClick = onSkip,
         shape = RoundedCornerShape(14.dp),
         modifier = Modifier.fillMaxWidth().height(52.dp),
     ) { Text("Use Basic Mode") }
