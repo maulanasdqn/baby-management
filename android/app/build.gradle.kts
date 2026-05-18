@@ -50,21 +50,7 @@ android {
     kotlin { compilerOptions { jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17 } }
     buildFeatures { compose = true; buildConfig = true }
 
-    sourceSets {
-        getByName("main") {
-            java.setSrcDirs(listOf(
-                "src/main/java",
-                "../libs/vault/kotlin",
-                "../libs/inference/kotlin",
-            ))
-            jniLibs.setSrcDirs(listOf(
-                "../libs/vault/jniLibs",
-                "../libs/inference/jniLibs",
-            ))
-        }
-    }
-
-    splits {
+splits {
         abi {
             isEnable = buildTypes.getByName("release").isMinifyEnabled
             reset()
