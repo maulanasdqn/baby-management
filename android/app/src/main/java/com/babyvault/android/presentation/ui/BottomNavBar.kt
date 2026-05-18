@@ -59,7 +59,7 @@ fun BottomNavBar(currentRoute: String, onNavigate: (String) -> Unit, modifier: M
             .fillMaxWidth()
             .background(Color.Transparent)
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 20.dp),
     ) {
         Surface(
             shape = RoundedCornerShape(28.dp),
