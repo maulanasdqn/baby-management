@@ -102,6 +102,7 @@ fun ChatScreen(
             onSend = { viewModel.send(it) },
             onStop = { viewModel.cancelGeneration() },
         )
+        Spacer(Modifier.navigationBarsPadding().height(80.dp))
     }
 }
 

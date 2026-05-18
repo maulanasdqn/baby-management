@@ -53,14 +53,13 @@ private val navItems = listOf(
 )
 
 @Composable
-fun BottomNavBar(currentRoute: String, onNavigate: (String) -> Unit) {
-    // Outer box: transparent, lets content show through the gap around the pill
+fun BottomNavBar(currentRoute: String, onNavigate: (String) -> Unit, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(Color.Transparent)
-            .padding(horizontal = 20.dp, vertical = 12.dp)
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
     ) {
         Surface(
             shape = RoundedCornerShape(28.dp),

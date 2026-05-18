@@ -45,7 +45,7 @@ fun InsightsScreen(viewModel: InsightsViewModel = hiltViewModel()) {
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(100.dp))
         }
     }
 }

@@ -39,7 +39,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
                 }
                 "empty" -> EmptyState()
                 else -> LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(state.items, key = { it.id }) { HistoryItemCard(it) }

@@ -146,7 +146,7 @@ fun HomeScreen(onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltView
                 MilestoneSection(milestones = state.milestones.take(3))
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(100.dp))
         }
     }
 }
