@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.ChildCare
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
@@ -96,7 +97,7 @@ fun SettingsScreen(
                 ) {
                     Surface(shape = CircleShape, color = Teal100, modifier = Modifier.size(56.dp)) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text("👶", style = MaterialTheme.typography.titleLarge)
+                            Icon(Icons.Filled.ChildCare, contentDescription = null, tint = Teal500, modifier = Modifier.size(28.dp))
                         }
                     }
                     Column(modifier = Modifier.weight(1f)) {

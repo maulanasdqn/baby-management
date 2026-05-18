@@ -191,7 +191,7 @@ private fun HomeHeader(name: String, ageLabel: String, photoUri: String?) {
                 .padding(horizontal = 20.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text("Good morning 👋", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.72f))
+            Text("Good morning", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.72f))
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 val photoFile = photoUri?.let { File(it).takeIf { f -> f.exists() } }
@@ -211,7 +211,7 @@ private fun HomeHeader(name: String, ageLabel: String, photoUri: String?) {
                 } else {
                     Surface(shape = CircleShape, color = PinkBlob.copy(alpha = 0.35f), modifier = Modifier.size(38.dp)) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text("👶", style = MaterialTheme.typography.bodyLarge)
+                            Icon(Icons.Filled.ChildCare, contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp))
                         }
                     }
                 }

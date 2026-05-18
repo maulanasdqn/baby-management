@@ -1,7 +1,10 @@
 package com.babyvault.android.presentation.screens.splash
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChildCare
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +46,7 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("👶", style = MaterialTheme.typography.displayLarge)
+            Icon(Icons.Filled.ChildCare, contentDescription = null, tint = Color.White, modifier = Modifier.size(80.dp))
             Text(
                 "Baby Vault",
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),

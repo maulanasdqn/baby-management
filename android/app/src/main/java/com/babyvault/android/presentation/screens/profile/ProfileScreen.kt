@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChildCare
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -200,7 +201,7 @@ fun ProfileScreen(
                         } else {
                             Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.2f), modifier = Modifier.fillMaxSize()) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text("👶", style = MaterialTheme.typography.displaySmall)
+                                    Icon(Icons.Filled.ChildCare, contentDescription = null, tint = Color.White, modifier = Modifier.size(36.dp))
                                 }
                             }
                         }

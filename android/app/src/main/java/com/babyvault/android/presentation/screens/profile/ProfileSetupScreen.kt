@@ -3,6 +3,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChildCare
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,7 +60,7 @@ fun ProfileSetupScreen(onDone: () -> Unit, viewModel: ProfileSetupViewModel = hi
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("👶", style = MaterialTheme.typography.displayMedium)
+                Icon(Icons.Filled.ChildCare, contentDescription = null, modifier = Modifier.size(64.dp))
                 Text(
                     "Welcome to Baby Vault",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
