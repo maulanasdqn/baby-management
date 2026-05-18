@@ -24,7 +24,7 @@ internal fun itemDecorFor(id: String): ItemDecor = when {
     else                        -> ItemDecor(Icons.Filled.Circle,     Color(0xFFE8E8E8), Color(0xFFAAAAAA))
 }
 @Composable
-internal fun HistoryItemCard(item: HistoryItem) {
+internal fun HistoryItemCard(item: HistoryItem, onDelete: () -> Unit) {
     val decor = itemDecorFor(item.id)
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -33,7 +33,7 @@ internal fun HistoryItemCard(item: HistoryItem) {
         elevation = CardDefaults.cardElevation(1.dp),
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -53,6 +53,9 @@ internal fun HistoryItemCard(item: HistoryItem) {
                 }
             }
             Text(item.timeLabel, style = MaterialTheme.typography.labelSmall, color = TextSecondary)
+            IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
+                Icon(Icons.Filled.DeleteOutline, contentDescription = "Delete", tint = Color(0xFFB0B0B0), modifier = Modifier.size(18.dp))
+            }
         }
     }
 }

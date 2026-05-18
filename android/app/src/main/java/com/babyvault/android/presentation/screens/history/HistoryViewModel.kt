@@ -2,6 +2,10 @@ package com.babyvault.android.presentation.screens.history
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.babyvault.android.domain.usecase.DeleteDiaperUseCase
+import com.babyvault.android.domain.usecase.DeleteFeedUseCase
+import com.babyvault.android.domain.usecase.DeleteMilestoneUseCase
+import com.babyvault.android.domain.usecase.DeleteSleepUseCase
 import com.babyvault.android.domain.usecase.ListDiaperByRangeUseCase
 import com.babyvault.android.domain.usecase.ListFeedByRangeUseCase
 import com.babyvault.android.domain.usecase.ListMilestonesUseCase
@@ -24,19 +28,35 @@ class HistoryViewModel @Inject constructor(
     private val listSleep: ListSleepByRangeUseCase,
     private val listDiaper: ListDiaperByRangeUseCase,
     private val listMilestones: ListMilestonesUseCase,
+    private val deleteFeed: DeleteFeedUseCase,
+    private val deleteSleep: DeleteSleepUseCase,
+    private val deleteDiaper: DeleteDiaperUseCase,
+    private val deleteMilestone: DeleteMilestoneUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HistoryState(isLoading = true))
     val state: StateFlow<HistoryState> = _state.asStateFlow()
     private val fmt = DateTimeFormatter.ofPattern("MMM d, HH:mm").withZone(ZoneId.systemDefault())
-    init {
-        loadRange(7)
-    }
+    private var currentRangeDays = 7
+    init { loadRange(7) }
     fun loadRange(days: Int) {
+        currentRangeDays = days
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val to = System.currentTimeMillis()
             val from = to - (days.toLong() * 24 * 60 * 60 * 1000)
             loadInternal(from, to)
+        }
+    }
+    fun delete(prefixedId: String) {
+        viewModelScope.launch {
+            val result = when {
+                prefixedId.startsWith("feed_") -> deleteFeed(prefixedId.removePrefix("feed_"))
+                prefixedId.startsWith("sleep_") -> deleteSleep(prefixedId.removePrefix("sleep_"))
+                prefixedId.startsWith("diaper_") -> deleteDiaper(prefixedId.removePrefix("diaper_"))
+                prefixedId.startsWith("milestone_") -> deleteMilestone(prefixedId.removePrefix("milestone_"))
+                else -> return@launch
+            }
+            if (result.isSuccess) loadRange(currentRangeDays)
         }
     }
     private suspend fun loadInternal(from: Long, to: Long) {

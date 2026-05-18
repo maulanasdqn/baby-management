@@ -79,8 +79,12 @@ dependencies {
     implementation(libs.jna) { artifact { type = "aar" } }
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.hilt.work)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.coil.compose)
     ksp(libs.hilt.compiler)
     ksp(libs.hilt.work.compiler)
+    ksp(libs.room.compiler)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test)

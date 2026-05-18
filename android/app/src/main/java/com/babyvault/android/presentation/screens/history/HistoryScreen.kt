@@ -42,7 +42,9 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    items(state.items, key = { it.id }) { HistoryItemCard(it) }
+                    items(state.items, key = { it.id }) { item ->
+                        HistoryItemCard(item, onDelete = { viewModel.delete(item.id) })
+                    }
                 }
             }
         }

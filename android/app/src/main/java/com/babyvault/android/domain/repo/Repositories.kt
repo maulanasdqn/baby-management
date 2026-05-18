@@ -22,6 +22,7 @@ interface GrowthRepository {
         loggedAt: Instant,
     ): Result<GrowthLog>
     suspend fun listByRange(from: Instant, to: Instant): Result<List<GrowthLog>>
+    suspend fun delete(id: String): Result<Unit>
 }
 interface MediaRepository {
     suspend fun store(title: String, plaintextBytes: ByteArray): Result<MediaItem>

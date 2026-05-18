@@ -15,3 +15,6 @@ class ListGrowthByRangeUseCase @Inject constructor(private val repo: GrowthRepos
     suspend operator fun invoke(from: Instant, to: Instant): Result<List<GrowthLog>> =
         repo.listByRange(from, to)
 }
+class DeleteGrowthUseCase @Inject constructor(private val repo: GrowthRepository) {
+    suspend operator fun invoke(id: String): Result<Unit> = repo.delete(id)
+}

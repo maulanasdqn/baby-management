@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.ChildCare
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocalDrink
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
@@ -44,11 +45,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.babyvault.android.domain.model.Milestone
+import java.io.File
 import com.babyvault.android.presentation.theme.Amber100
 import com.babyvault.android.presentation.theme.Amber400
 import com.babyvault.android.presentation.theme.CardWhite
@@ -101,11 +105,16 @@ fun HomeScreen(onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltView
             .background(WarmCream)
             .verticalScroll(rememberScrollState()),
     ) {
-        HomeHeader(name = state.babyName, ageLabel = state.babyAgeLabel)
+        HomeHeader(name = state.babyName, ageLabel = state.babyAgeLabel, photoUri = state.babyPhotoUri)
 
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
 
             Spacer(Modifier.height(20.dp))
+
+            state.nextFeedLabel?.let { label ->
+                NextFeedBanner(label = label)
+                Spacer(Modifier.height(12.dp))
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -152,14 +161,13 @@ fun HomeScreen(onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltView
 }
 
 @Composable
-private fun HomeHeader(name: String, ageLabel: String) {
+private fun HomeHeader(name: String, ageLabel: String, photoUri: String?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
             .background(Brush.verticalGradient(listOf(Navy900, NavyPrimary))),
     ) {
-        // Large decorative blob — top-right
         Box(
             modifier = Modifier
                 .size(160.dp)
@@ -168,7 +176,6 @@ private fun HomeHeader(name: String, ageLabel: String) {
                 .clip(CircleShape)
                 .background(PinkBlob.copy(alpha = 0.45f)),
         )
-        // Smaller blob — bottom-left
         Box(
             modifier = Modifier
                 .size(90.dp)
@@ -177,7 +184,6 @@ private fun HomeHeader(name: String, ageLabel: String) {
                 .clip(CircleShape)
                 .background(PinkBlob.copy(alpha = 0.25f)),
         )
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -185,16 +191,28 @@ private fun HomeHeader(name: String, ageLabel: String) {
                 .padding(horizontal = 20.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(
-                "Good morning 👋",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.72f),
-            )
+            Text("Good morning 👋", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.72f))
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Surface(shape = CircleShape, color = PinkBlob.copy(alpha = 0.35f), modifier = Modifier.size(38.dp)) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text("👶", style = MaterialTheme.typography.bodyLarge)
+                val photoFile = photoUri?.let { File(it).takeIf { f -> f.exists() } }
+                if (photoFile != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape),
+                    ) {
+                        AsyncImage(
+                            model = photoFile,
+                            contentDescription = "Baby photo",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                } else {
+                    Surface(shape = CircleShape, color = PinkBlob.copy(alpha = 0.35f), modifier = Modifier.size(38.dp)) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text("👶", style = MaterialTheme.typography.bodyLarge)
+                        }
                     }
                 }
                 Column {
@@ -209,6 +227,30 @@ private fun HomeHeader(name: String, ageLabel: String) {
                 }
                 Icon(Icons.Default.ExpandMore, contentDescription = null, tint = Color.White.copy(alpha = 0.65f), modifier = Modifier.size(20.dp))
             }
+        }
+    }
+}
+
+@Composable
+private fun NextFeedBanner(label: String) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = Rose100,
+        shadowElevation = 1.dp,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier.size(32.dp).clip(CircleShape).background(Rose400.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Filled.NotificationsNone, contentDescription = null, tint = Rose400, modifier = Modifier.size(18.dp))
+            }
+            Text(label, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = TextPrimary)
         }
     }
 }

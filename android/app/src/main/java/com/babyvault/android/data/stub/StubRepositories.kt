@@ -50,6 +50,10 @@ class StubGrowthRepository @Inject constructor() : GrowthRepository {
     }
     override suspend fun listByRange(from: Instant, to: Instant): Result<List<GrowthLog>> =
         Result.success(store.filter { !it.loggedAt.isBefore(from) && !it.loggedAt.isAfter(to) })
+    override suspend fun delete(id: String): Result<Unit> {
+        store.removeIf { it.id == id }
+        return Result.success(Unit)
+    }
 }
 
 @Singleton

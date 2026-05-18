@@ -1,6 +1,10 @@
 package com.babyvault.android.presentation.screens.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EditCalendar
@@ -49,12 +54,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.babyvault.android.presentation.theme.CardSurface
 import com.babyvault.android.presentation.theme.NeutralGray
 import com.babyvault.android.presentation.theme.Teal100
@@ -63,6 +71,7 @@ import com.babyvault.android.presentation.theme.Teal500
 import com.babyvault.android.presentation.theme.Teal600
 import com.babyvault.android.presentation.theme.TextPrimary
 import com.babyvault.android.presentation.theme.TextSecondary
+import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
@@ -84,14 +93,24 @@ fun ProfileScreen(
     var selectedDate by remember { mutableStateOf(LocalDate.now().minusMonths(3)) }
     var showDatePicker by remember { mutableStateOf(false) }
     var dirty by remember { mutableStateOf(false) }
+    var localPhotoUri by remember { mutableStateOf<String?>(null) }
 
-    // Populate fields once profile loads
+    val photoPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            viewModel.savePhoto(it)
+            localPhotoUri = it.toString()
+        }
+    }
+
     LaunchedEffect(state.profile) {
         state.profile?.let { p ->
             if (!dirty) {
                 name = p.name
                 selectedDate = Instant.ofEpochMilli(p.dobMillis).atZone(ZoneOffset.UTC).toLocalDate()
             }
+            if (localPhotoUri == null) localPhotoUri = p.photoUri
         }
     }
 
@@ -158,11 +177,44 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(top = 32.dp),
                 ) {
-                    Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.2f), modifier = Modifier.size(80.dp)) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text("👶", style = MaterialTheme.typography.displaySmall)
+                    // Photo avatar with tap-to-change
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                photoPicker.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val resolvedPhoto = localPhotoUri?.let { File(it).takeIf { f -> f.exists() } }
+                        if (resolvedPhoto != null) {
+                            AsyncImage(
+                                model = resolvedPhoto,
+                                contentDescription = "Baby photo",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else {
+                            Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.2f), modifier = Modifier.fillMaxSize()) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text("👶", style = MaterialTheme.typography.displaySmall)
+                                }
+                            }
+                        }
+                        // Camera overlay
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.28f), CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(Icons.Filled.AddAPhoto, contentDescription = "Change photo", tint = Color.White, modifier = Modifier.size(22.dp))
                         }
                     }
+
                     if (name.isNotBlank()) {
                         Text(
                             name,
@@ -184,14 +236,9 @@ fun ProfileScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                // Name field
                 Surface(shape = RoundedCornerShape(20.dp), color = CardSurface, shadowElevation = 2.dp) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            "BABY'S NAME",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextSecondary,
-                        )
+                        Text("BABY'S NAME", style = MaterialTheme.typography.labelSmall, color = TextSecondary)
                         OutlinedTextField(
                             value = name,
                             onValueChange = { name = it; dirty = true },
@@ -210,14 +257,9 @@ fun ProfileScreen(
                     }
                 }
 
-                // Date of birth field
                 Surface(shape = RoundedCornerShape(20.dp), color = CardSurface, shadowElevation = 2.dp) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            "DATE OF BIRTH",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextSecondary,
-                        )
+                        Text("DATE OF BIRTH", style = MaterialTheme.typography.labelSmall, color = TextSecondary)
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -226,10 +268,7 @@ fun ProfileScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Icon(Icons.Default.Cake, contentDescription = null, tint = Teal500, modifier = Modifier.size(20.dp))
                                 Text(DOB_FMT.format(selectedDate), style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
                             }
@@ -248,7 +287,9 @@ fun ProfileScreen(
                         viewModel.save(name, dob)
                     },
                     enabled = name.isNotBlank() && dirty,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Teal500),
                 ) {
