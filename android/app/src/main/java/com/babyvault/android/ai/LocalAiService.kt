@@ -1,12 +1,9 @@
 package com.babyvault.android.ai
 
 import android.content.Context
-import com.babyvault.inference.NativeInferenceEngine
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,8 +12,6 @@ import javax.inject.Singleton
 class LocalAiService @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) {
-    private var engine: NativeInferenceEngine? = null
-
     fun modelDir(): File = File(context.filesDir, "inference_model")
 
     fun isModelDownloaded(): Boolean {
@@ -26,38 +21,14 @@ class LocalAiService @Inject constructor(
                dir.resolve("merges.txt").exists()
     }
 
-    fun isReady(): Boolean = engine?.isReady() == true
+    fun isReady(): Boolean = false
 
     fun initialize(): InferenceStatus {
         if (!isModelDownloaded()) return InferenceStatus.ModelMissing
-        return try {
-            System.loadLibrary("inference")
-            val eng = NativeInferenceEngine(modelDir().absolutePath)
-            if (eng.isReady()) {
-                engine = eng
-                InferenceStatus.Ready
-            } else {
-                val reason = eng.loadError() ?: "Engine returned not-ready with no error detail"
-                InferenceStatus.Error(reason)
-            }
-        } catch (e: Exception) {
-            InferenceStatus.Error(e.message ?: "unknown error")
-        }
+        return InferenceStatus.Error("Native inference bridge not linked — run build.sh from baby-management-core first.")
     }
 
-    fun generate(userMessage: String): Flow<String> {
-        val eng = engine
-        if (eng == null || !eng.isReady()) {
-            return flow { emit(stubReply(userMessage)) }
-        }
-        return flow {
-            val stream = eng.generateStream(userMessage, 200u)
-            while (true) {
-                val token = stream.nextToken() ?: break
-                emit(token)
-            }
-        }.flowOn(Dispatchers.IO)
-    }
+    fun generate(userMessage: String): Flow<String> = flow { emit(stubReply(userMessage)) }
 
     private fun stubReply(q: String): String {
         val lower = q.lowercase()

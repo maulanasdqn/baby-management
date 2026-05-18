@@ -1,14 +1,14 @@
 package com.babyvault.android.presentation.screens.home
+
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.babyvault.android.core.vault.VaultEngineProvider
 import com.babyvault.android.data.local.BabyProfileStore
 import com.babyvault.android.domain.model.Milestone
 import com.babyvault.android.domain.usecase.ListDiaperByRangeUseCase
 import com.babyvault.android.domain.usecase.ListFeedByRangeUseCase
 import com.babyvault.android.domain.usecase.ListMilestonesUseCase
 import com.babyvault.android.domain.usecase.ListSleepByRangeUseCase
-import androidx.compose.runtime.Immutable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,9 +20,9 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+
 @Immutable
 data class HomeUiState(
-    val engineVersion: String = "",
     val milestones: List<Milestone> = emptyList(),
     val isLoading: Boolean = true,
     val babyName: String = "",
@@ -31,10 +31,10 @@ data class HomeUiState(
     val todaySleepMinutes: Long = 0L,
     val todayDiapers: Int = 0,
 )
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val listMilestones: ListMilestonesUseCase,
-    private val engineProvider: VaultEngineProvider,
     private val profileStore: BabyProfileStore,
     private val listFeed: ListFeedByRangeUseCase,
     private val listSleep: ListSleepByRangeUseCase,
@@ -42,11 +42,12 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
+
     init {
         viewModelScope.launch { load() }
     }
+
     private suspend fun load() {
-        val version = engineProvider.engine.engineVersion()
         val milestones = listMilestones(limit = 5).getOrDefault(emptyList())
         val profile = profileStore.profile.first()
         val babyName = profile?.name ?: ""
@@ -58,7 +59,6 @@ class HomeViewModel @Inject constructor(
             ?.sumOf { it.durationMinutes } ?: 0L
         val todayDiapers = listDiaper(todayStart, now).getOrNull()?.size ?: 0
         _state.value = HomeUiState(
-            engineVersion = version,
             milestones = milestones,
             isLoading = false,
             babyName = babyName,
@@ -68,12 +68,14 @@ class HomeViewModel @Inject constructor(
             todayDiapers = todayDiapers,
         )
     }
+
     fun refresh() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
             load()
         }
     }
+
     private fun ageLabel(dobMillis: Long): String {
         val dob = Instant.ofEpochMilli(dobMillis).atZone(ZoneId.systemDefault()).toLocalDate()
         val now = LocalDate.now()
